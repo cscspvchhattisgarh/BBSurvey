@@ -226,8 +226,20 @@
       });
   };
 
+  // Helper function to safely read sheet columns with flexible key matching
+  function getVal(row, keyPrefix) {
+    if (!row) return "";
+    const cleanPrefix = keyPrefix.toLowerCase().trim();
+    for (let k in row) {
+      if (k.toLowerCase().trim() === cleanPrefix) {
+        return row[k];
+      }
+    }
+    return "";
+  }
+
   function populateDistricts() {
-    const districts = [...new Set(masterData.map(item => String(item["DISTRICT"] || "").trim()))].filter(Boolean);
+    const districts = [...new Set(masterData.map(item => String(getVal(item, "DISTRICT")).trim()))].filter(Boolean);
     const select = document.getElementById("districtSelect");
     districts.forEach(d => {
       let opt = document.createElement("option");
@@ -243,7 +255,7 @@
     blockSelect.innerHTML = '<option value="">-- Choose Block --</option>';
     
     if (dist) {
-      const blocks = [...new Set(masterData.filter(i => String(i["DISTRICT"] || "").trim() === dist).map(i => String(i["BLOCK"] || "").trim()))].filter(Boolean);
+      const blocks = [...new Set(masterData.filter(i => String(getVal(i, "DISTRICT")).trim() === dist).map(i => String(getVal(i, "BLOCK")).trim()))].filter(Boolean);
       blocks.forEach(b => {
         let opt = document.createElement("option");
         opt.value = b;
@@ -265,10 +277,10 @@
     gpSelect.innerHTML = '<option value="">-- Choose Gram Panchayat --</option>';
 
     if (block) {
-      const gps = masterData.filter(i => String(i["DISTRICT"] || "").trim() === dist && String(i["BLOCK"] || "").trim() === block);
+      const gps = masterData.filter(i => String(getVal(i, "DISTRICT")).trim() === dist && String(i["BLOCK"] || getVal(i, "BLOCK")).trim() === block);
       gps.forEach(g => {
         let opt = document.createElement("option");
-        let name = String(g["GRAMPANCHAYAT NAME"] || "").trim();
+        let name = String(getVal(g, "GRAMPANCHAYAT NAME")).trim();
         opt.value = name;
         opt.textContent = name;
         gpSelect.appendChild(opt);
@@ -286,9 +298,9 @@
     const gpName = document.getElementById("gpSelect").value;
 
     selectedGPData = masterData.find(i => 
-      String(i["DISTRICT"] || "").trim() === dist && 
-      String(i["BLOCK"] || "").trim() === block && 
-      String(i["GRAMPANCHAYAT NAME"] || "").trim() === gpName
+      String(getVal(i, "DISTRICT")).trim() === dist && 
+      String(getVal(i, "BLOCK")).trim() === block && 
+      String(getVal(i, "GRAMPANCHAYAT NAME")).trim() === gpName
     );
 
     if (!selectedGPData) return;
@@ -297,7 +309,7 @@
     let showSubmit = false;
 
     // AP Status Check
-    const apStatus = String(selectedGPData["ACCESS POINT STATUS"] || "").trim().toUpperCase();
+    const apStatus = String(getVal(selectedGPData, "ACCESS POINT STATUS")).trim().toUpperCase();
     if (apStatus === "INSTALLED") {
       document.getElementById("apSection").classList.remove("hidden");
       
@@ -315,21 +327,24 @@
     // FTTH Status Check
     const ftthContainer = document.getElementById("ftthSubscribersList");
     ftthContainer.innerHTML = "";
-    const ftthStatus = String(selectedGPData["FTTH STATUS"] || "").trim().toUpperCase();
+    const ftthStatus = String(getVal(selectedGPData, "FTTH STATUS")).trim().toUpperCase();
 
     if (ftthStatus === "INSTALLED") {
       document.getElementById("ftthSection").classList.remove("hidden");
       showSubmit = true;
 
       for (let i = 1; i <= 5; i++) {
-        let subId = selectedGPData[`SUBSCRIBER ID - ${i}`];
-        let org = selectedGPData[`ORGANISATION - TYPE ${i}`];
+        let subId = getVal(selectedGPData, `SUBSCRIBER ID - ${i}`);
+        let org = getVal(selectedGPData, `ORGANISATION - TYPE ${i}`);
 
         if (subId && String(subId).trim() !== "") {
           let div = document.createElement("div");
           div.className = "form-group";
-          // Sirf Organization name dikhane ke liye update kiya gaya label
-          div.innerHTML = `<label>${org || 'Subscriber ' + i} - Router Installed?</label>
+          
+          // STRICT LABEL FIX: Sirf Organization Name + "- Router Installed?" dikhayega
+          let displayLabel = org && String(org).trim() !== "" ? String(org).trim() : `Location ${i}`;
+          
+          div.innerHTML = `<label>${displayLabel} - Router Installed?</label>
             <select id="sub_${i}_status" required>
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
@@ -358,12 +373,12 @@
     btn.disabled = true;
 
     const payload = {
-      districtName: selectedGPData["DISTRICT"] || "",
-      districtCode: selectedGPData["DISTRICT CODE"] || "",
-      blockName: selectedGPData["BLOCK"] || "",
-      blockCode: selectedGPData["BLOCK CODE"] || "",
-      gpName: selectedGPData["GRAMPANCHAYAT NAME"] || "",
-      gpCode: selectedGPData["GRAMPANCHAYAT CODE"] || "",
+      districtName: getVal(selectedGPData, "DISTRICT"),
+      districtCode: getVal(selectedGPData, "DISTRICT CODE"),
+      blockName: getVal(selectedGPData, "BLOCK"),
+      blockCode: getVal(selectedGPData, "BLOCK CODE"),
+      gpName: getVal(selectedGPData, "GRAMPANCHAYAT NAME"),
+      gpCode: getVal(selectedGPData, "GRAMPANCHAYAT CODE"),
       
       apPoleStatus: document.getElementById("ap_pole") ? document.getElementById("ap_pole").value : "",
       apStatus: document.getElementById("ap_inst") ? document.getElementById("ap_inst").value : "",
@@ -371,24 +386,24 @@
       ccuStatus: document.getElementById("ccu_inst") ? document.getElementById("ccu_inst").value : "",
       batteryStatus: document.getElementById("batt_inst") ? document.getElementById("batt_inst").value : "",
       
-      sub1Id: selectedGPData["SUBSCRIBER ID - 1"] || "",
-      sub1Org: selectedGPData["ORGANISATION - TYPE 1"] || "",
+      sub1Id: getVal(selectedGPData, "SUBSCRIBER ID - 1"),
+      sub1Org: getVal(selectedGPData, "ORGANISATION - TYPE 1"),
       sub1Status: document.getElementById("sub_1_status") ? document.getElementById("sub_1_status").value : "",
       
-      sub2Id: selectedGPData["SUBSCRIBER ID - 2"] || "",
-      sub2Org: selectedGPData["ORGANISATION - TYPE 2"] || "",
+      sub2Id: getVal(selectedGPData, "SUBSCRIBER ID - 2"),
+      sub2Org: getVal(selectedGPData, "ORGANISATION - TYPE 2"),
       sub2Status: document.getElementById("sub_2_status") ? document.getElementById("sub_2_status").value : "",
       
-      sub3Id: selectedGPData["SUBSCRIBER ID - 3"] || "",
-      sub3Org: selectedGPData["ORGANISATION - TYPE 3"] || "",
+      sub3Id: getVal(selectedGPData, "SUBSCRIBER ID - 3"),
+      sub3Org: getVal(selectedGPData, "ORGANISATION - TYPE 3"),
       sub3Status: document.getElementById("sub_3_status") ? document.getElementById("sub_3_status").value : "",
       
-      sub4Id: selectedGPData["SUBSCRIBER ID - 4"] || "",
-      sub4Org: selectedGPData["ORGANISATION - TYPE 4"] || "",
+      sub4Id: getVal(selectedGPData, "SUBSCRIBER ID - 4"),
+      sub4Org: getVal(selectedGPData, "ORGANISATION - TYPE 4"),
       sub4Status: document.getElementById("sub_4_status") ? document.getElementById("sub_4_status").value : "",
       
-      sub5Id: selectedGPData["SUBSCRIBER ID - 5"] || "",
-      sub5Org: selectedGPData["ORGANISATION - TYPE 5"] || "",
+      sub5Id: getVal(selectedGPData, "SUBSCRIBER ID - 5"),
+      sub5Org: getVal(selectedGPData, "ORGANISATION - TYPE 5"),
       sub5Status: document.getElementById("sub_5_status") ? document.getElementById("sub_5_status").value : ""
     };
 
