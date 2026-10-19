@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AP & FTTH Field Survey Portal</title>
+  <title>Bharatnet Pre-Survey</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -48,8 +48,8 @@
       text-align: center;
     }
 
-    .app-header h2 { margin: 0 0 6px 0; font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
-    .app-header p { margin: 0; font-size: 13px; color: #c7d2fe; font-weight: 500; }
+    .app-header h2 { margin: 0 0 6px 0; font-size: 24px; font-weight: 700; letter-spacing: -0.3px; }
+    .app-header p { margin: 0; font-size: 14px; color: #c7d2fe; font-weight: 500; }
     .card-body { padding: 28px 24px; }
 
     .step-badge {
@@ -158,8 +158,8 @@
 
 <div class="container">
   <div class="app-header" id="appHeader">
-    <h2>AP & FTTH Field Survey Portal</h2>
-    <p>CSC e-Governance Services India Limited</p>
+    <h2>Bharatnet Pre-Survey</h2>
+    <p>Access point & Government FTTH Survey</p>
   </div>
 
   <div class="card-body">
@@ -325,14 +325,12 @@
     loadMasterDataFast();
   };
 
-  // HIGH-SPEED DATA LOADING WITH LOCALSTORAGE CACHE
   function loadMasterDataFast() {
     const cachedData = localStorage.getItem("survey_master_data");
     
     if (cachedData) {
       masterData = JSON.parse(cachedData);
       initApp();
-      // Background re-fetch to keep data updated silently
       fetchMasterDataFromServer(true);
     } else {
       fetchMasterDataFromServer(false);
@@ -523,156 +521,4 @@
     gpSelect.innerHTML = '<option value="">-- Choose Gram Panchayat --</option>';
 
     if (block) {
-      const gps = masterData.filter(i => String(getVal(i, "DISTRICT")).trim() === dist && String(getVal(i, "BLOCK")).trim() === block);
-      gps.forEach(g => {
-        let opt = document.createElement("option");
-        let name = String(getVal(g, "GRAMPANCHAYAT NAME")).trim();
-        opt.value = name;
-        opt.textContent = name;
-        gpSelect.appendChild(opt);
-      });
-      document.getElementById("targetGpDiv").classList.remove("hidden");
-    } else {
-      document.getElementById("targetGpDiv").classList.add("hidden");
-    }
-    document.getElementById("surveyForm").classList.add("hidden");
-  }
-
-  function onTargetGPChange() {
-    const dist = document.getElementById("districtSelect").value;
-    const block = document.getElementById("blockSelect").value;
-    const gpName = document.getElementById("gpSelect").value;
-
-    selectedGPData = masterData.find(i => 
-      String(getVal(i, "DISTRICT")).trim() === dist && 
-      String(getVal(i, "BLOCK")).trim() === block && 
-      String(getVal(i, "GRAMPANCHAYAT NAME")).trim() === gpName
-    );
-
-    if (!selectedGPData) return;
-
-    document.getElementById("surveyForm").classList.remove("hidden");
-    let showSubmit = false;
-
-    const apStatus = String(getVal(selectedGPData, "ACCESS POINT STATUS")).trim().toUpperCase();
-    if (apStatus === "INSTALLED") {
-      document.getElementById("apSection").classList.remove("hidden");
-      if(document.getElementById("ap_pole")) document.getElementById("ap_pole").value = "";
-      if(document.getElementById("ap_inst")) document.getElementById("ap_inst").value = "";
-      if(document.getElementById("solar_inst")) document.getElementById("solar_inst").value = "";
-      if(document.getElementById("ccu_inst")) document.getElementById("ccu_inst").value = "";
-      if(document.getElementById("batt_inst")) document.getElementById("batt_inst").value = "";
-      showSubmit = true;
-    } else {
-      document.getElementById("apSection").classList.add("hidden");
-    }
-
-    const ftthContainer = document.getElementById("ftthSubscribersList");
-    ftthContainer.innerHTML = "";
-    const ftthStatus = String(getVal(selectedGPData, "FTTH STATUS")).trim().toUpperCase();
-
-    if (ftthStatus === "INSTALLED") {
-      document.getElementById("ftthSection").classList.remove("hidden");
-      showSubmit = true;
-
-      for (let i = 1; i <= 5; i++) {
-        let subId = getVal(selectedGPData, `SUBSCRIBER ID - ${i}`);
-        let org = getVal(selectedGPData, `ORGANISATION - TYPE ${i}`);
-
-        if (subId && String(subId).trim() !== "") {
-          let div = document.createElement("div");
-          div.className = "form-group";
-          let displayLabel = org && String(org).trim() !== "" ? String(org).trim() : `Location ${i}`;
-          
-          div.innerHTML = `<label>${displayLabel} - Router Installed?</label>
-            <select id="sub_${i}_status" required>
-              <option value="">-- Select --</option>
-              <option value="YES">YES</option>
-              <option value="NO">NO</option>
-            </select>`;
-          ftthContainer.appendChild(div);
-        }
-      }
-    } else {
-      document.getElementById("ftthSection").classList.add("hidden");
-    }
-
-    if (!showSubmit) {
-      document.getElementById("noSurveyMsg").classList.remove("hidden");
-      document.getElementById("submitBtn").classList.add("hidden");
-    } else {
-      document.getElementById("noSurveyMsg").classList.add("hidden");
-      document.getElementById("submitBtn").classList.remove("hidden");
-    }
-  }
-
-  function submitSurvey(e) {
-    e.preventDefault();
-    const btn = document.getElementById("submitBtn");
-    btn.innerText = "Submitting Response...";
-    btn.disabled = true;
-
-    const payload = {
-      surveyorDistrict: document.getElementById("survDistrict").value,
-      surveyorBlock: document.getElementById("survBlock").value,
-      surveyorGp: document.getElementById("survGp").value,
-      cscId: document.getElementById("cscId").value,
-      vleName: document.getElementById("vleName").value,
-      mobileNumber: document.getElementById("mobileNumber").value,
-      emailId: document.getElementById("emailId").value,
-      latitude: document.getElementById("latitude").value,
-      longitude: document.getElementById("longitude").value,
-
-      districtName: getVal(selectedGPData, "DISTRICT"),
-      districtCode: getVal(selectedGPData, "DISTRICT CODE"),
-      blockName: getVal(selectedGPData, "BLOCK"),
-      blockCode: getVal(selectedGPData, "BLOCK CODE"),
-      gpName: getVal(selectedGPData, "GRAMPANCHAYAT NAME"),
-      gpCode: getVal(selectedGPData, "GRAMPANCHAYAT CODE"),
-      
-      apPoleStatus: document.getElementById("ap_pole") ? document.getElementById("ap_pole").value : "",
-      apStatus: document.getElementById("ap_inst") ? document.getElementById("ap_inst").value : "",
-      solarStatus: document.getElementById("solar_inst") ? document.getElementById("solar_inst").value : "",
-      ccuStatus: document.getElementById("ccu_inst") ? document.getElementById("ccu_inst").value : "",
-      batteryStatus: document.getElementById("batt_inst") ? document.getElementById("batt_inst").value : "",
-      
-      sub1Id: getVal(selectedGPData, "SUBSCRIBER ID - 1"),
-      sub1Org: getVal(selectedGPData, "ORGANISATION - TYPE 1"),
-      sub1Status: document.getElementById("sub_1_status") ? document.getElementById("sub_1_status").value : "",
-      
-      sub2Id: getVal(selectedGPData, "SUBSCRIBER ID - 2"),
-      sub2Org: getVal(selectedGPData, "ORGANISATION - TYPE 2"),
-      sub2Status: document.getElementById("sub_2_status") ? document.getElementById("sub_2_status").value : "",
-      
-      sub3Id: getVal(selectedGPData, "SUBSCRIBER ID - 3"),
-      sub3Org: getVal(selectedGPData, "ORGANISATION - TYPE 3"),
-      sub3Status: document.getElementById("sub_3_status") ? document.getElementById("sub_3_status").value : "",
-      
-      sub4Id: getVal(selectedGPData, "SUBSCRIBER ID - 4"),
-      sub4Org: getVal(selectedGPData, "ORGANISATION - TYPE 4"),
-      sub4Status: document.getElementById("sub_4_status") ? document.getElementById("sub_4_status").value : "",
-      
-      sub5Id: getVal(selectedGPData, "SUBSCRIBER ID - 5"),
-      sub5Org: getVal(selectedGPData, "ORGANISATION - TYPE 5"),
-      sub5Status: document.getElementById("sub_5_status") ? document.getElementById("sub_5_status").value : ""
-    };
-
-    fetch(API_URL, {
-      method: "POST",
-      body: JSON.stringify(payload)
-    })
-    .then(res => res.json())
-    .then(res => {
-      document.getElementById("surveySection").classList.add("hidden");
-      document.getElementById("appHeader").classList.add("hidden");
-      document.getElementById("thankYouScreen").classList.remove("hidden");
-    })
-    .catch(err => {
-      alert("❌ Submission Error: " + err);
-      btn.innerText = "Submit Final Survey Response";
-      btn.disabled = false;
-    });
-  }
-</script>
-</body>
-</html>
+      const gps = masterData.filter(i => String(getVal(i, "DISTRICT")).trim() === dist && String(getVal(i,
