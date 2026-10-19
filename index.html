@@ -477,10 +477,10 @@
     }
   }
 
-  function submitSurvey(e) {
+  async function submitSurvey(e) {
     e.preventDefault();
 
-    // 1. CSC ID Validation (12 digits, 9th & 10th='0', 11th='1')
+    // 1. CSC ID Pattern Check (12 digits, 9th & 10th='0', 11th='1')
     const cscVal = document.getElementById("cscId").value;
     const isCscValid = (cscVal.length === 12) && 
                        (cscVal.charAt(8) === '0') && 
@@ -507,26 +507,44 @@
     }
 
     const btn = document.getElementById("submitBtn");
-    btn.innerText = "Submitting Response...";
+    btn.innerText = "Verifying CSC ID...";
     btn.disabled = true;
+
+    // 4. Real-time Trained VLE Check against Google Sheet tab "Trained_VLEs"
+    try {
+      const checkRes = await fetch(API_URL + "?action=validateCsc&cscId=" + encodeURIComponent(cscVal));
+      const checkData = await checkRes.json();
+
+      if (!checkData.allowed) {
+        alert("आपने प्रशिक्षण नहीं लिया है कृपया अपने सीएससी जिला प्रबंधक से संपर्क करें");
+        btn.innerText = "Submit Final Survey Response";
+        btn.disabled = false;
+        return;
+      }
+    } catch (err) {
+      alert("❌ Error verifying CSC ID. Please try again.");
+      btn.innerText = "Submit Final Survey Response";
+      btn.disabled = false;
+      return;
+    }
+
+    btn.innerText = "Submitting Response...";
 
     const selectedDistrict = getVal(selectedGPData, "DISTRICT");
     const selectedBlock = getVal(selectedGPData, "BLOCK");
     const selectedGp = getVal(selectedGPData, "GRAMPANCHAYAT NAME");
 
     const payload = {
-      // Surveyor Info (Passes same location)
       surveyorDistrict: selectedDistrict,
       surveyorBlock: selectedBlock,
       surveyorGp: selectedGp,
-      cscId: document.getElementById("cscId").value,
+      cscId: cscVal,
       vleName: document.getElementById("vleName").value,
-      mobileNumber: document.getElementById("mobileNumber").value,
+      mobileNumber: mobVal,
       emailId: document.getElementById("emailId").value,
       latitude: document.getElementById("latitude").value,
       longitude: document.getElementById("longitude").value,
 
-      // Target GP Info
       districtName: selectedDistrict,
       districtCode: getVal(selectedGPData, "DISTRICT CODE"),
       blockName: selectedBlock,
@@ -534,14 +552,12 @@
       gpName: selectedGp,
       gpCode: getVal(selectedGPData, "GRAMPANCHAYAT CODE"),
       
-      // AP Survey Answers
       apPoleStatus: document.getElementById("ap_pole") ? document.getElementById("ap_pole").value : "",
       apStatus: document.getElementById("ap_inst") ? document.getElementById("ap_inst").value : "",
       solarStatus: document.getElementById("solar_inst") ? document.getElementById("solar_inst").value : "",
       ccuStatus: document.getElementById("ccu_inst") ? document.getElementById("ccu_inst").value : "",
       batteryStatus: document.getElementById("batt_inst") ? document.getElementById("batt_inst").value : "",
       
-      // FTTH Survey Answers
       sub1Id: getVal(selectedGPData, "SUBSCRIBER ID - 1"),
       sub1Org: getVal(selectedGPData, "ORGANISATION - TYPE 1"),
       sub1Status: document.getElementById("sub_1_status") ? document.getElementById("sub_1_status").value : "",
