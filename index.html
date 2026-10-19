@@ -314,19 +314,19 @@
         </select>
       </div>
 
-      <!-- CSC ID Validation: Only 12 numbers & must end with "00" -->
+      <!-- CSC ID Input -->
       <div class="form-group">
-        <label for="cscId">CSC ID * (12 digits, ending with 00)</label>
-        <input type="text" id="cscId" placeholder="e.g. 123456789000" maxlength="12" oninput="validateCscInput(this)" required>
+        <label for="cscId">CSC ID * (12 digits, e.g. 538426020012)</label>
+        <input type="text" id="cscId" placeholder="e.g. 538426020012" maxlength="12" oninput="validateCscInput(this)" required>
       </div>
 
-      <!-- VLE Name Validation: Only Alphabets & Spaces, AUTO UPPERCASE -->
+      <!-- VLE Name Input -->
       <div class="form-group">
         <label for="vleName">VLE Name * (Text Only)</label>
         <input type="text" id="vleName" placeholder="ENTER FULL NAME" oninput="validateNameInput(this)" required>
       </div>
 
-      <!-- Mobile Validation: Only 10 digits starting with 6-9 -->
+      <!-- Mobile Input -->
       <div class="form-group">
         <label for="mobileNumber">Mobile Number * (10 Digits)</label>
         <input type="tel" id="mobileNumber" placeholder="Enter 10-digit Mobile Number" maxlength="10" oninput="validateMobileInput(this)" required>
@@ -467,7 +467,6 @@
       });
   };
 
-  // Safe Header Value Fetch
   function getVal(row, keyPrefix) {
     if (!row) return "";
     const cleanPrefix = keyPrefix.toLowerCase().trim();
@@ -479,17 +478,17 @@
     return "";
   }
 
-  // --- VALIDATIONS ---
+  // --- INPUT VALIDATIONS ---
   function validateCscInput(input) {
-    input.value = input.value.replace(/[^0-9]/g, ''); // Number only
+    input.value = input.value.replace(/[^0-9]/g, ''); // Numbers only
   }
 
   function validateNameInput(input) {
-    input.value = input.value.replace(/[^a-zA-Z\s]/g, '').toUpperCase(); // Alphabets only & AUTO UPPERCASE
+    input.value = input.value.replace(/[^a-zA-Z\s]/g, '').toUpperCase(); // Text only & Uppercase
   }
 
   function validateMobileInput(input) {
-    input.value = input.value.replace(/[^0-9]/g, ''); // Number only
+    input.value = input.value.replace(/[^0-9]/g, ''); // Numbers only
   }
 
   // --- GPS CAPTURE ---
@@ -571,15 +570,22 @@
   function proceedToSurvey(e) {
     e.preventDefault();
 
+    // CSC ID VALIDATION RULE:
+    // Length = 12, 9th digit (index 8) = '0', 10th digit (index 9) = '0', 11th digit (index 10) = '1'
     const cscVal = document.getElementById("cscId").value;
-    if (cscVal.length !== 12 || !cscVal.endsWith("00")) {
-      alert("❌ CSC ID must be exactly 12 digits long and end with '00' (e.g. 123456789000)");
+    const isCscValid = (cscVal.length === 12) && 
+                       (cscVal.charAt(8) === '0') && 
+                       (cscVal.charAt(9) === '0') && 
+                       (cscVal.charAt(10) === '1');
+
+    if (!isCscValid) {
+      alert("PLEASE ENTER CORRECT CSC ID");
       return;
     }
 
     const mobVal = document.getElementById("mobileNumber").value;
     if (mobVal.length !== 10 || !/^[6-9]/.test(mobVal)) {
-      alert("❌ Mobile Number must be a valid 10-digit number starting with 6, 7, 8, or 9!");
+      alert("PLEASE ENTER CORRECT MOBILE NUMBER");
       return;
     }
 
