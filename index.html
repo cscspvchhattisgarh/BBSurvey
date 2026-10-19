@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AP & FTTH Field Survey App</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 15px;
+      background-color: #f0f2f5;
+    }
+    .container {
+      max-width: 650px;
+      margin: auto;
+      background: #ffffff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    h2 {
+      text-align: center;
+      color: #1a365d;
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 22px;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 6px;
+      color: #2d3748;
+      font-size: 14px;
+    }
+    select, input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd5e0;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 15px;
+      background-color: #fff;
+    }
+    select:focus {
+      border-color: #3182ce;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
+    }
+    .section {
+      background: #ebf8ff;
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 20px;
+      border-left: 5px solid #3182ce;
+    }
+    .section-ftth {
+      background: #f0fff4;
+      border-left-color: #38a169;
+    }
+    .section h3 {
+      margin-top: 0;
+      font-size: 16px;
+      color: #2c5282;
+      margin-bottom: 14px;
+    }
+    .section-ftth h3 {
+      color: #22543d;
+    }
+    .hidden {
+      display: none;
+    }
+    button {
+      width: 100%;
+      background-color: #38a169;
+      color: white;
+      font-weight: bold;
+      padding: 14px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 25px;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background-color: #2f855a;
+    }
+    button:disabled {
+      background-color: #a0aec0;
+      cursor: not-allowed;
+    }
+    .loading-text {
+      text-align: center;
+      color: #4a5568;
+      font-weight: 600;
+      padding: 20px;
+    }
+    .alert-msg {
+      color: #e53e3e;
+      text-align: center;
+      font-weight: bold;
+      margin: 20px 0;
+      padding: 12px;
+      background: #fff5f5;
+      border: 1px solid #fed7d7;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>AP & FTTH Survey Application</h2>
+
+  <div id="loader" class="loading-text">⌛ Master Data Load Ho Raha Hai, kripya prateeksha karein...</div>
+
+  <div id="mainForm" class="hidden">
+    <!-- Location Dropdowns -->
+    <div class="form-group">
+      <label for="districtSelect">1. District Select Karein:</label>
+      <select id="districtSelect" onchange="onDistrictChange()" required>
+        <option value="">-- Choose District --</option>
+      </select>
+    </div>
+
+    <div class="form-group hidden" id="blockDiv">
+      <label for="blockSelect">2. Block Select Karein:</label>
+      <select id="blockSelect" onchange="onBlockChange()" required>
+        <option value="">-- Choose Block --</option>
+      </select>
+    </div>
+
+    <div class="form-group hidden" id="gpDiv">
+      <label for="gpSelect">3. Gram Panchayat Select Karein:</label>
+      <select id="gpSelect" onchange="onGPChange()" required>
+        <option value="">-- Choose Gram Panchayat --</option>
+      </select>
+    </div>
+
+    <!-- Dynamic Form Sections -->
+    <form id="surveyForm" class="hidden" onsubmit="submitSurvey(event)">
+      
+      <!-- AP Survey Section -->
+      <div id="apSection" class="section hidden">
+        <h3>📡 Access Point Survey (Installed)</h3>
+        <div class="form-group">
+          <label>1) Access Point - Pole Installed?</label>
+          <select id="ap_pole" required>
+            <option value="">-- Select --</option>
+            <option value="YES">YES</option>
+            <option value="NO">NO</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>2) Access Point Installed?</label>
+          <select id="ap_inst" required>
+            <option value="">-- Select --</option>
+            <option value="YES">YES</option>
+            <option value="NO">NO</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>3) Solar Installed?</label>
+          <select id="solar_inst" required>
+            <option value="">-- Select --</option>
+            <option value="YES">YES</option>
+            <option value="NO">NO</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>4) CCU Installed?</label>
+          <select id="ccu_inst" required>
+            <option value="">-- Select --</option>
+            <option value="YES">YES</option>
+            <option value="NO">NO</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>5) Battery Installed?</label>
+          <select id="batt_inst" required>
+            <option value="">-- Select --</option>
+            <option value="YES">YES</option>
+            <option value="NO">NO</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- FTTH Survey Section -->
+      <div id="ftthSection" class="section section-ftth hidden">
+        <h3>🌐 FTTH Router Survey</h3>
+        <div id="ftthSubscribersList"></div>
+      </div>
+
+      <div id="noSurveyMsg" class="alert-msg hidden">
+        ⚠️ Is Gram Panchayat me AP aur FTTH dono "NOT INSTALLED" hain. Survey ki aavashyakta nahi hai.
+      </div>
+
+      <button type="submit" id="submitBtn" class="hidden">Submit Survey Response</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Apka Web App URL yaha paste karein
+  const API_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+
+  let masterData = [];
+  let selectedGPData = null;
+
+  window.onload = function() {
+    fetch(API_URL + "?action=getMasters")
+      .then(res => res.json())
+      .then(data => {
+        masterData = data;
+        document.getElementById("loader").classList.add("hidden");
+        document.getElementById("mainForm").classList.remove("hidden");
+        populateDistricts();
+      })
+      .catch(err => {
+        document.getElementById("loader").innerText = "❌ Data load karne me truti aayi. Kripya Internet Connection check karein aur page refresh karein.";
+      });
+  };
+
+  function populateDistricts() {
+    const districts = [...new Set(masterData.map(item => String(item["DISTRICT"] || "").trim()))].filter(Boolean);
+    const select = document.getElementById("districtSelect");
+    districts.forEach(d => {
+      let opt = document.createElement("option");
+      opt.value = d;
+      opt.textContent = d;
+      select.appendChild(opt);
+    });
+  }
+
+  function onDistrictChange() {
+    const dist = document.getElementById("districtSelect").value;
+    const blockSelect = document.getElementById("blockSelect");
+    blockSelect.innerHTML = '<option value="">-- Choose Block --</option>';
+    
+    if (dist) {
+      const blocks = [...new Set(masterData.filter(i => String(i["DISTRICT"] || "").trim() === dist).map(i => String(i["BLOCK"] || "").trim()))].filter(Boolean);
+      blocks.forEach(b => {
+        let opt = document.createElement("option");
+        opt.value = b;
+        opt.textContent = b;
+        blockSelect.appendChild(opt);
+      });
+      document.getElementById("blockDiv").classList.remove("hidden");
+    } else {
+      document.getElementById("blockDiv").classList.add("hidden");
+    }
+    document.getElementById("gpDiv").classList.add("hidden");
+    document.getElementById("surveyForm").classList.add("hidden");
+  }
+
+  function onBlockChange() {
+    const dist = document.getElementById("districtSelect").value;
+    const block = document.getElementById("blockSelect").value;
+    const gpSelect = document.getElementById("gpSelect");
+    gpSelect.innerHTML = '<option value="">-- Choose Gram Panchayat --</option>';
+
+    if (block) {
+      const gps = masterData.filter(i => String(i["DISTRICT"] || "").trim() === dist && String(i["BLOCK"] || "").trim() === block);
+      gps.forEach(g => {
+        let opt = document.createElement("option");
+        let name = String(g["GRAMPANCHAYAT NAME"] || "").trim();
+        opt.value = name;
+        opt.textContent = name;
+        gpSelect.appendChild(opt);
+      });
+      document.getElementById("gpDiv").classList.remove("hidden");
+    } else {
+      document.getElementById("gpDiv").classList.add("hidden");
+    }
+    document.getElementById("surveyForm").classList.add("hidden");
+  }
+
+  function onGPChange() {
+    const dist = document.getElementById("districtSelect").value;
+    const block = document.getElementById("blockSelect").value;
+    const gpName = document.getElementById("gpSelect").value;
+
+    selectedGPData = masterData.find(i => 
+      String(i["DISTRICT"] || "").trim() === dist && 
+      String(i["BLOCK"] || "").trim() === block && 
+      String(i["GRAMPANCHAYAT NAME"] || "").trim() === gpName
+    );
+
+    if (!selectedGPData) return;
+
+    document.getElementById("surveyForm").classList.remove("hidden");
+    let showSubmit = false;
+
+    // AP Status Check
+    const apStatus = String(selectedGPData["ACCESS POINT STATUS"] || "").trim().toUpperCase();
+    if (apStatus === "INSTALLED") {
+      document.getElementById("apSection").classList.remove("hidden");
+      
+      // Reset inputs to blank default
+      if(document.getElementById("ap_pole")) document.getElementById("ap_pole").value = "";
+      if(document.getElementById("ap_inst")) document.getElementById("ap_inst").value = "";
+      if(document.getElementById("solar_inst")) document.getElementById("solar_inst").value = "";
+      if(document.getElementById("ccu_inst")) document.getElementById("ccu_inst").value = "";
+      if(document.getElementById("batt_inst")) document.getElementById("batt_inst").value = "";
+      
+      showSubmit = true;
+    } else {
+      document.getElementById("apSection").classList.add("hidden");
+    }
+
+    // FTTH Status Check
+    const ftthContainer = document.getElementById("ftthSubscribersList");
+    ftthContainer.innerHTML = "";
+    const ftthStatus = String(selectedGPData["FTTH STATUS"] || "").trim().toUpperCase();
+
+    if (ftthStatus === "INSTALLED") {
+      document.getElementById("ftthSection").classList.remove("hidden");
+      showSubmit = true;
+
+      for (let i = 1; i <= 5; i++) {
+        let subId = selectedGPData[`SUBSCRIBER ID - ${i}`];
+        let org = selectedGPData[`ORGANISATION - TYPE ${i}`];
+
+        if (subId && String(subId).trim() !== "") {
+          let div = document.createElement("div");
+          div.className = "form-group";
+          div.innerHTML = `<label>Subscriber ${i}: [ID: ${subId} | Org: ${org}] - Router Installed?</label>
+            <select id="sub_${i}_status" required>
+              <option value="">-- Select --</option>
+              <option value="YES">YES</option>
+              <option value="NO">NO</option>
+            </select>`;
+          ftthContainer.appendChild(div);
+        }
+      }
+    } else {
+      document.getElementById("ftthSection").classList.add("hidden");
+    }
+
+    if (!showSubmit) {
+      document.getElementById("noSurveyMsg").classList.remove("hidden");
+      document.getElementById("submitBtn").classList.add("hidden");
+    } else {
+      document.getElementById("noSurveyMsg").classList.add("hidden");
+      document.getElementById("submitBtn").classList.remove("hidden");
+    }
+  }
+
+  function submitSurvey(e) {
+    e.preventDefault();
+    const btn = document.getElementById("submitBtn");
+    btn.innerText = "Submitting Response...";
+    btn.disabled = true;
+
+    const payload = {
+      districtName: selectedGPData["DISTRICT"] || "",
+      districtCode: selectedGPData["DISTRICT CODE"] || "",
+      blockName: selectedGPData["BLOCK"] || "",
+      blockCode: selectedGPData["BLOCK CODE"] || "",
+      gpName: selectedGPData["GRAMPANCHAYAT NAME"] || "",
+      gpCode: selectedGPData["GRAMPANCHAYAT CODE"] || "",
+      
+      apPoleStatus: document.getElementById("ap_pole") ? document.getElementById("ap_pole").value : "",
+      apStatus: document.getElementById("ap_inst") ? document.getElementById("ap_inst").value : "",
+      solarStatus: document.getElementById("solar_inst") ? document.getElementById("solar_inst").value : "",
+      ccuStatus: document.getElementById("ccu_inst") ? document.getElementById("ccu_inst").value : "",
+      batteryStatus: document.getElementById("batt_inst") ? document.getElementById("batt_inst").value : "",
+      
+      sub1Id: selectedGPData["SUBSCRIBER ID - 1"] || "",
+      sub1Org: selectedGPData["ORGANISATION - TYPE 1"] || "",
+      sub1Status: document.getElementById("sub_1_status") ? document.getElementById("sub_1_status").value : "",
+      
+      sub2Id: selectedGPData["SUBSCRIBER ID - 2"] || "",
+      sub2Org: selectedGPData["ORGANISATION - TYPE 2"] || "",
+      sub2Status: document.getElementById("sub_2_status") ? document.getElementById("sub_2_status").value : "",
+      
+      sub3Id: selectedGPData["SUBSCRIBER ID - 3"] || "",
+      sub3Org: selectedGPData["ORGANISATION - TYPE 3"] || "",
+      sub3Status: document.getElementById("sub_3_status") ? document.getElementById("sub_3_status").value : "",
+      
+      sub4Id: selectedGPData["SUBSCRIBER ID - 4"] || "",
+      sub4Org: selectedGPData["ORGANISATION - TYPE 4"] || "",
+      sub4Status: document.getElementById("sub_4_status") ? document.getElementById("sub_4_status").value : "",
+      
+      sub5Id: selectedGPData["SUBSCRIBER ID - 5"] || "",
+      sub5Org: selectedGPData["ORGANISATION - TYPE 5"] || "",
+      sub5Status: document.getElementById("sub_5_status") ? document.getElementById("sub_5_status").value : ""
+    };
+
+    fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(res => {
+      alert("✅ Survey Response successfully saved in Google Sheet!");
+      location.reload();
+    })
+    .catch(err => {
+      alert("❌ Submission Error: " + err);
+      btn.innerText = "Submit Survey Response";
+      btn.disabled = false;
+    });
+  }
+</script>
+</body>
+</html>
