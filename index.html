@@ -102,9 +102,12 @@
       border-left: 5px solid var(--primary);
     }
 
+    .section-gpon { background: #fdf4ff; border-color: #f5d0fe; border-left-color: #c084fc; }
     .section-ftth { background: #ecfdf5; border-color: #a7f3d0; border-left-color: var(--success); }
     .section-surveyor { background: #f8fafc; border-color: #e2e8f0; border-left-color: #312e81; }
+
     .section h3 { margin-top: 0; font-size: 15px; color: #1e40af; margin-bottom: 14px; font-weight: 700; }
+    .section-gpon h3 { color: #86198f; }
     .section-ftth h3 { color: #065f46; }
     .section-surveyor h3 { color: #1e1b4b; }
     .hidden { display: none !important; }
@@ -214,11 +217,9 @@
           </div>
         </div>
 
-        <!-- 3. ACCESS POINT SURVEY QUESTIONS -->
-        <div id="apSection" class="section hidden">
-          <h3>📡 Access Point Survey (Installed)</h3>
-          
-          <!-- NEW GPON QUESTION -->
+        <!-- 3. SEPARATE GPON SURVEY SECTION -->
+        <div id="gponSection" class="section section-gpon hidden">
+          <h3>🖥️ GPON Survey</h3>
           <div class="form-group">
             <label>1) GPON Installed?</label>
             <select id="gpon_inst" required>
@@ -227,9 +228,14 @@
               <option value="NO">NO</option>
             </select>
           </div>
+        </div>
 
+        <!-- 4. ACCESS POINT SURVEY QUESTIONS SECTION -->
+        <div id="apSection" class="section hidden">
+          <h3>📡 Access Point Survey (Installed)</h3>
+          
           <div class="form-group">
-            <label>2) Access Point - Pole Installed?</label>
+            <label>1) Access Point - Pole Installed?</label>
             <select id="ap_pole" required>
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
@@ -238,7 +244,7 @@
           </div>
 
           <div class="form-group">
-            <label>3) Access Point Installed?</label>
+            <label>2) Access Point Installed?</label>
             <select id="ap_inst" required>
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
@@ -247,7 +253,7 @@
           </div>
 
           <div class="form-group">
-            <label>4) Solar Installed?</label>
+            <label>3) Solar Installed?</label>
             <select id="solar_inst" required>
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
@@ -256,7 +262,7 @@
           </div>
 
           <div class="form-group">
-            <label>5) CCU Installed?</label>
+            <label>4) CCU Installed?</label>
             <select id="ccu_inst" required>
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
@@ -265,7 +271,7 @@
           </div>
 
           <div class="form-group">
-            <label>6) Battery Installed?</label>
+            <label>5) Battery Installed?</label>
             <select id="batt_inst" required>
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
@@ -274,7 +280,7 @@
           </div>
         </div>
 
-        <!-- 4. FTTH ROUTER SURVEY QUESTIONS -->
+        <!-- 5. FTTH ROUTER SURVEY QUESTIONS SECTION -->
         <div id="ftthSection" class="section section-ftth hidden">
           <h3>🌐 FTTH Router Survey</h3>
           <div id="ftthSubscribersList"></div>
@@ -441,6 +447,7 @@
     // Access Point Logic Check
     const apStatus = String(getVal(selectedGPData, "ACCESS POINT STATUS")).trim().toUpperCase();
     if (apStatus === "INSTALLED") {
+      document.getElementById("gponSection").classList.remove("hidden");
       document.getElementById("apSection").classList.remove("hidden");
       if(document.getElementById("gpon_inst")) document.getElementById("gpon_inst").value = "";
       if(document.getElementById("ap_pole")) document.getElementById("ap_pole").value = "";
@@ -450,6 +457,7 @@
       if(document.getElementById("batt_inst")) document.getElementById("batt_inst").value = "";
       showSubmit = true;
     } else {
+      document.getElementById("gponSection").classList.add("hidden");
       document.getElementById("apSection").classList.add("hidden");
     }
 
