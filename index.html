@@ -217,40 +217,55 @@
         <!-- 3. ACCESS POINT SURVEY QUESTIONS -->
         <div id="apSection" class="section hidden">
           <h3>📡 Access Point Survey (Installed)</h3>
+          
+          <!-- NEW GPON QUESTION -->
           <div class="form-group">
-            <label>1) Access Point - Pole Installed?</label>
+            <label>1) GPON Installed?</label>
+            <select id="gpon_inst" required>
+              <option value="">-- Select --</option>
+              <option value="YES">YES</option>
+              <option value="NO">NO</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>2) Access Point - Pole Installed?</label>
             <select id="ap_pole" required>
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
               <option value="NO">NO</option>
             </select>
           </div>
+
           <div class="form-group">
-            <label>2) Access Point Installed?</label>
+            <label>3) Access Point Installed?</label>
             <select id="ap_inst" required>
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
               <option value="NO">NO</option>
             </select>
           </div>
+
           <div class="form-group">
-            <label>3) Solar Installed?</label>
+            <label>4) Solar Installed?</label>
             <select id="solar_inst" required>
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
               <option value="NO">NO</option>
             </select>
           </div>
+
           <div class="form-group">
-            <label>4) CCU Installed?</label>
+            <label>5) CCU Installed?</label>
             <select id="ccu_inst" required>
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
               <option value="NO">NO</option>
             </select>
           </div>
+
           <div class="form-group">
-            <label>5) Battery Installed?</label>
+            <label>6) Battery Installed?</label>
             <select id="batt_inst" required>
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
@@ -427,6 +442,7 @@
     const apStatus = String(getVal(selectedGPData, "ACCESS POINT STATUS")).trim().toUpperCase();
     if (apStatus === "INSTALLED") {
       document.getElementById("apSection").classList.remove("hidden");
+      if(document.getElementById("gpon_inst")) document.getElementById("gpon_inst").value = "";
       if(document.getElementById("ap_pole")) document.getElementById("ap_pole").value = "";
       if(document.getElementById("ap_inst")) document.getElementById("ap_inst").value = "";
       if(document.getElementById("solar_inst")) document.getElementById("solar_inst").value = "";
@@ -552,6 +568,7 @@
       gpName: selectedGp,
       gpCode: getVal(selectedGPData, "GRAMPANCHAYAT CODE"),
       
+      gponStatus: document.getElementById("gpon_inst") ? document.getElementById("gpon_inst").value : "",
       apPoleStatus: document.getElementById("ap_pole") ? document.getElementById("ap_pole").value : "",
       apStatus: document.getElementById("ap_inst") ? document.getElementById("ap_inst").value : "",
       solarStatus: document.getElementById("solar_inst") ? document.getElementById("solar_inst").value : "",
