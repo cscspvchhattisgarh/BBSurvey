@@ -135,12 +135,12 @@
     .loading-text { text-align: center; color: var(--text-muted); font-weight: 600; padding: 30px 0; font-size: 15px; }
     .alert-msg { color: var(--error); text-align: center; font-weight: 600; margin: 20px 0; padding: 14px; background: #fff1f2; border: 1px solid #fecdd3; border-radius: 10px; font-size: 13.5px; }
 
-    .thank-you-card { text-align: center; padding: 40px 20px; animation: fadeIn 0.4s ease-in-out; }
+    .thank-you-card { text-align: center; padding: 50px 20px; animation: fadeIn 0.4s ease-in-out; }
     .thank-you-card .icon-circle {
       width: 76px; height: 76px; background: #dcfce7; color: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 38px; margin: 0 auto 20px auto;
     }
     .thank-you-card h2 { color: #0f172a; font-size: 26px; margin-bottom: 8px; }
-    .thank-you-card p { color: var(--text-muted); font-size: 15px; margin-bottom: 28px; }
+    .thank-you-card p { color: var(--text-muted); font-size: 15px; margin-bottom: 0; }
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
   </style>
@@ -294,12 +294,11 @@
       </div>
     </form>
 
-    <!-- THANK YOU SCREEN -->
+    <!-- THANK YOU SCREEN (WITHOUT START NEW SURVEY BUTTON) -->
     <div id="thankYouScreen" class="thank-you-card hidden">
       <div class="icon-circle">✓</div>
       <h2>Thank You</h2>
       <p>Survey Completed Successfully!</p>
-      <button class="btn" onclick="location.reload()" style="max-width:220px; margin:auto;">Start New Survey</button>
     </div>
   </div>
 </div>
