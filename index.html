@@ -72,6 +72,7 @@
       background-repeat: no-repeat;
       background-position: right 14px center;
       background-size: 16px;
+      padding-right: 36px;
     }
 
     input:focus, select:focus {
@@ -113,7 +114,6 @@
     .section-surveyor h3 { color: #1e1b4b; }
     .hidden { display: none !important; }
 
-    /* Live Camera Box Styling */
     .cam-capture-box {
       margin-top: 10px;
       padding: 12px;
@@ -121,6 +121,23 @@
       border: 1.5px dashed #94a3b8;
       border-radius: 10px;
       text-align: center;
+    }
+
+    .reason-box {
+      margin-top: 10px;
+      padding: 12px;
+      background: #fff1f2;
+      border: 1.5px solid #fecdd3;
+      border-radius: 10px;
+    }
+    .reason-box label {
+      color: #be123c;
+      font-size: 12.5px;
+      margin-bottom: 6px;
+    }
+    .reason-box select {
+      border-color: #fda4af;
+      font-size: 13px;
     }
 
     .btn-cam {
@@ -164,7 +181,6 @@
       margin-top: 6px;
     }
 
-    /* Fullscreen Live Camera Modal */
     .camera-modal {
       position: fixed;
       inset: 0;
@@ -398,12 +414,13 @@
           <h3>🖥️ GPON Survey</h3>
           <div class="form-group">
             <label>1) GPON Installed?</label>
-            <select id="gpon_inst" onchange="handlePhotoToggle('gpon_inst', 'GPON Equipment')">
+            <select id="gpon_inst" onchange="handleStatusChange('gpon_inst', 'GPON Equipment')">
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
               <option value="NO">NO</option>
             </select>
             <div id="cam_box_gpon_inst" class="cam-capture-box hidden"></div>
+            <div id="reason_box_gpon_inst" class="reason-box hidden"></div>
           </div>
         </div>
 
@@ -413,52 +430,57 @@
           
           <div class="form-group">
             <label>1) Access Point - Pole Installed?</label>
-            <select id="ap_pole" onchange="handlePhotoToggle('ap_pole', 'Access Point Pole')">
+            <select id="ap_pole" onchange="handleStatusChange('ap_pole', 'Access Point Pole')">
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
               <option value="NO">NO</option>
             </select>
             <div id="cam_box_ap_pole" class="cam-capture-box hidden"></div>
+            <div id="reason_box_ap_pole" class="reason-box hidden"></div>
           </div>
 
           <div class="form-group">
             <label>2) Access Point Installed?</label>
-            <select id="ap_inst" onchange="handlePhotoToggle('ap_inst', 'Access Point Device')">
+            <select id="ap_inst" onchange="handleStatusChange('ap_inst', 'Access Point Device')">
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
               <option value="NO">NO</option>
             </select>
             <div id="cam_box_ap_inst" class="cam-capture-box hidden"></div>
+            <div id="reason_box_ap_inst" class="reason-box hidden"></div>
           </div>
 
           <div class="form-group">
             <label>3) Solar Installed?</label>
-            <select id="solar_inst" onchange="handlePhotoToggle('solar_inst', 'Solar Panel')">
+            <select id="solar_inst" onchange="handleStatusChange('solar_inst', 'Solar Panel')">
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
               <option value="NO">NO</option>
             </select>
             <div id="cam_box_solar_inst" class="cam-capture-box hidden"></div>
+            <div id="reason_box_solar_inst" class="reason-box hidden"></div>
           </div>
 
           <div class="form-group">
             <label>4) CCU Installed?</label>
-            <select id="ccu_inst" onchange="handlePhotoToggle('ccu_inst', 'CCU Unit')">
+            <select id="ccu_inst" onchange="handleStatusChange('ccu_inst', 'CCU Unit')">
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
               <option value="NO">NO</option>
             </select>
             <div id="cam_box_ccu_inst" class="cam-capture-box hidden"></div>
+            <div id="reason_box_ccu_inst" class="reason-box hidden"></div>
           </div>
 
           <div class="form-group">
             <label>5) Battery Installed?</label>
-            <select id="batt_inst" onchange="handlePhotoToggle('batt_inst', 'Battery Bank')">
+            <select id="batt_inst" onchange="handleStatusChange('batt_inst', 'Battery Bank')">
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
               <option value="NO">NO</option>
             </select>
             <div id="cam_box_batt_inst" class="cam-capture-box hidden"></div>
+            <div id="reason_box_batt_inst" class="reason-box hidden"></div>
           </div>
         </div>
 
@@ -499,13 +521,25 @@
 <script>
   const API_URL = "https://script.google.com/macros/s/AKfycbw0JETvro-L-dN_eUDyuUQavxOA7lr4WtIhqjZbzpXbVH3kN73Gc8-0MX37gVz89F2Hag/exec";
 
+  // Bilingual (English + Hindi) Reason Options when "NO" is selected
+  const NO_REASONS = [
+    { value: "Equipment Missing (उपकरण गायब है)", label: "Equipment Missing (उपकरण गायब है)" },
+    { value: "Equipment Stolen (उपकरण चोरी हो गया है)", label: "Equipment Stolen (उपकरण चोरी हो गया है)" },
+    { value: "Equipment Damaged and Removed from Site (उपकरण क्षतिग्रस्त होकर साइट से हटा दिया गया है)", label: "Equipment Damaged and Removed from Site (उपकरण क्षतिग्रस्त होकर साइट से हटा दिया गया है)" },
+    { value: "Equipment Shifted / Relocated (उपकरण दूसरी जगह स्थानांतरित किया गया है)", label: "Equipment Shifted / Relocated (उपकरण दूसरी जगह स्थानांतरित किया गया है)" },
+    { value: "Equipment Removed During Renovation (मरम्मत/नवीनीकरण के दौरान उपकरण हटाया गया है)", label: "Equipment Removed During Renovation (मरम्मत/नवीनीकरण के दौरान उपकरण हटाया गया है)" },
+    { value: "Equipment Handed Over to Another Agency (उपकरण किसी अन्य एजेंसी को सौंप दिया गया है)", label: "Equipment Handed Over to Another Agency (उपकरण किसी अन्य एजेंसी को सौंप दिया गया है)" },
+    { value: "Location Not Traceable (स्थान का पता नहीं चल पा रहा है)", label: "Location Not Traceable (स्थान का पता नहीं चल पा रहा है)" },
+    { value: "Disposed of Due to Damage or Obsolescence (खराब या पुराना होने के कारण नष्ट/निस्तारित कर दिया गया है)", label: "Disposed of Due to Damage or Obsolescence (खराब या पुराना होने के कारण नष्ट/निस्तारित कर दिया गया है)" },
+    { value: "Not Provided (उपलब्ध नहीं कराया गया है)", label: "Not Provided (उपलब्ध नहीं कराया गया है)" }
+  ];
+
   let masterData = [];
   let vleMappings = [];
   let selectedGPData = null;
   let verifiedCscId = "";
 
-  // Live Camera & Captured Photos Store
-  let capturedPhotos = {}; // { fieldId: "data:image/jpeg;base64,..." }
+  let capturedPhotos = {};
   let activePhotoField = "";
   let activePhotoLabel = "";
   let activeStream = null;
@@ -553,22 +587,60 @@
     }
   }
 
-  /* =========================================================
-     STRICT LIVE CAMERA FUNCTIONS (NO FILE UPLOAD)
-     ========================================================= */
-  function handlePhotoToggle(fieldId, itemLabel) {
+  function handleStatusChange(fieldId, itemLabel) {
     const selectEl = document.getElementById(fieldId);
     const camBox = document.getElementById("cam_box_" + fieldId);
-    if (!selectEl || !camBox) return;
+    const reasonBox = document.getElementById("reason_box_" + fieldId);
+    if (!selectEl) return;
 
-    if (selectEl.value === "YES") {
-      camBox.classList.remove("hidden");
-      renderCameraBox(fieldId, itemLabel);
+    const val = selectEl.value;
+
+    if (val === "YES") {
+      if (camBox) {
+        camBox.classList.remove("hidden");
+        renderCameraBox(fieldId, itemLabel);
+      }
+      if (reasonBox) {
+        reasonBox.classList.add("hidden");
+        reasonBox.innerHTML = "";
+      }
+    } else if (val === "NO") {
+      if (camBox) {
+        camBox.classList.add("hidden");
+        camBox.innerHTML = "";
+      }
+      delete capturedPhotos[fieldId];
+
+      if (reasonBox) {
+        reasonBox.classList.remove("hidden");
+        renderReasonBox(fieldId, itemLabel);
+      }
     } else {
-      camBox.classList.add("hidden");
-      camBox.innerHTML = "";
+      if (camBox) {
+        camBox.classList.add("hidden");
+        camBox.innerHTML = "";
+      }
+      if (reasonBox) {
+        reasonBox.classList.add("hidden");
+        reasonBox.innerHTML = "";
+      }
       delete capturedPhotos[fieldId];
     }
+  }
+
+  function renderReasonBox(fieldId, itemLabel) {
+    const reasonBox = document.getElementById("reason_box_" + fieldId);
+    let optionsHtml = '<option value="">-- कारण चुनें / Select Reason --</option>';
+    NO_REASONS.forEach(r => {
+      optionsHtml += `<option value="${r.value}">${r.label}</option>`;
+    });
+
+    reasonBox.innerHTML = `
+      <label for="reason_${fieldId}">⚠️ Reason for NO / नहीं होने का कारण (${itemLabel}) *</label>
+      <select id="reason_${fieldId}" required>
+        ${optionsHtml}
+      </select>
+    `;
   }
 
   function renderCameraBox(fieldId, itemLabel) {
@@ -603,7 +675,6 @@
     document.getElementById("cameraModalTitle").innerText = "📷 Capture Live Photo: " + itemLabel;
 
     try {
-      // Rear camera priority without any file picker fallback
       activeStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
         audio: false
@@ -622,7 +693,6 @@
     const canvas = document.getElementById("captureCanvas");
     if (!video.videoWidth) return;
 
-    // Resize for fast upload while preserving clarity
     const maxWidth = 800;
     const scale = Math.min(1, maxWidth / video.videoWidth);
     canvas.width = video.videoWidth * scale;
@@ -631,7 +701,6 @@
     const ctx = canvas.getContext("2d");
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Add GPS + Timestamp + Item Watermark
     const lat = document.getElementById("latitude").value || "N/A";
     const lng = document.getElementById("longitude").value || "N/A";
     const gpName = document.getElementById("gpSelect").value || "";
@@ -646,7 +715,6 @@
     ctx.font = "12px sans-serif";
     ctx.fillText(`GPS: ${lat}, ${lng} | ${nowStr}`, 10, canvas.height - 13);
 
-    // Compress to JPEG Base64
     const dataUrl = canvas.toDataURL("image/jpeg", 0.72);
     capturedPhotos[activePhotoField] = dataUrl;
 
@@ -664,9 +732,6 @@
     document.getElementById("cameraModal").classList.add("hidden");
   }
 
-  /* =========================================================
-     CSC VERIFICATION & LOCATION CASCADING
-     ========================================================= */
   async function verifyCscId() {
     const cscVal = document.getElementById("cscIdInput").value;
     const errDiv = document.getElementById("loginError");
@@ -780,9 +845,8 @@
     const block = document.getElementById("blockSelect").value;
     const gpName = document.getElementById("gpSelect").value;
 
-    // Reset captured photos when GP changes
     capturedPhotos = {};
-    document.querySelectorAll(".cam-capture-box").forEach(el => {
+    document.querySelectorAll(".cam-capture-box, .reason-box").forEach(el => {
       el.classList.add("hidden");
       el.innerHTML = "";
     });
@@ -806,7 +870,6 @@
     document.getElementById("dynamicContent").classList.remove("hidden");
     let showSubmit = false;
 
-    // 1. GPON Survey section
     const gponSec = document.getElementById("gponSection");
     const gponSelect = document.getElementById("gpon_inst");
     gponSelect.value = "";
@@ -814,7 +877,6 @@
     gponSelect.setAttribute("required", "true");
     showSubmit = true;
 
-    // 2. Access Point survey section
     const apSec = document.getElementById("apSection");
     const apStatus = String(getVal(selectedGPData, "ACCESS POINT STATUS")).trim().toUpperCase();
     const apInputs = ["ap_pole", "ap_inst", "solar_inst", "ccu_inst", "batt_inst"];
@@ -835,7 +897,6 @@
       });
     }
 
-    // 3. FTTH Router Survey logic
     const ftthContainer = document.getElementById("ftthSubscribersList");
     ftthContainer.innerHTML = "";
     const ftthSec = document.getElementById("ftthSection");
@@ -856,12 +917,13 @@
           let safeLabel = displayLabel.replace(/'/g, "\\'");
           
           div.innerHTML = `<label>${displayLabel} - Router Installed?</label>
-            <select id="sub_${i}_status" onchange="handlePhotoToggle('sub_${i}_status', 'FTTH Router - ${safeLabel}')" required>
+            <select id="sub_${i}_status" onchange="handleStatusChange('sub_${i}_status', 'FTTH Router - ${safeLabel}')" required>
               <option value="">-- चुनें --</option>
               <option value="YES">YES</option>
               <option value="NO">NO</option>
             </select>
-            <div id="cam_box_sub_${i}_status" class="cam-capture-box hidden"></div>`;
+            <div id="cam_box_sub_${i}_status" class="cam-capture-box hidden"></div>
+            <div id="reason_box_sub_${i}_status" class="reason-box hidden"></div>`;
           ftthContainer.appendChild(div);
         }
       }
@@ -887,6 +949,11 @@
     return "";
   }
 
+  function getReasonVal(fieldId) {
+    const rEl = document.getElementById("reason_" + fieldId);
+    return rEl ? rEl.value : "";
+  }
+
   async function submitSurvey(e) {
     e.preventDefault();
 
@@ -902,8 +969,7 @@
       return;
     }
 
-    // Validate that every field selected as "YES" has a captured live photo
-    const requiredPhotoChecks = [
+    const surveyItems = [
       { id: "gpon_inst", label: "GPON Equipment" },
       { id: "ap_pole", label: "Access Point Pole" },
       { id: "ap_inst", label: "Access Point Device" },
@@ -917,10 +983,15 @@
       { id: "sub_5_status", label: "FTTH Location 5 Router" }
     ];
 
-    for (let item of requiredPhotoChecks) {
+    for (let item of surveyItems) {
       const el = document.getElementById(item.id);
       if (el && el.value === "YES" && !capturedPhotos[item.id]) {
         alert(`⚠️ आपने "${item.label}" के लिए YES चुना है। कृपया पहले लाइव कैमरे से इसकी फ़ोटो कैप्चर करें!`);
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+      if (el && el.value === "NO" && !getReasonVal(item.id)) {
+        alert(`⚠️ आपने "${item.label}" के लिए NO चुना है। कृपया कारण (Reason) चुनें!`);
         el.scrollIntoView({ behavior: "smooth", block: "center" });
         return;
       }
@@ -954,46 +1025,57 @@
       
       gponStatus: document.getElementById("gpon_inst") ? document.getElementById("gpon_inst").value : "",
       gponPhoto: capturedPhotos["gpon_inst"] || "",
+      gponReason: getReasonVal("gpon_inst"),
 
       apPoleStatus: document.getElementById("ap_pole") ? document.getElementById("ap_pole").value : "",
       apPolePhoto: capturedPhotos["ap_pole"] || "",
+      apPoleReason: getReasonVal("ap_pole"),
 
       apStatus: document.getElementById("ap_inst") ? document.getElementById("ap_inst").value : "",
       apPhoto: capturedPhotos["ap_inst"] || "",
+      apReason: getReasonVal("ap_inst"),
 
       solarStatus: document.getElementById("solar_inst") ? document.getElementById("solar_inst").value : "",
       solarPhoto: capturedPhotos["solar_inst"] || "",
+      solarReason: getReasonVal("solar_inst"),
 
       ccuStatus: document.getElementById("ccu_inst") ? document.getElementById("ccu_inst").value : "",
       ccuPhoto: capturedPhotos["ccu_inst"] || "",
+      ccuReason: getReasonVal("ccu_inst"),
 
       batteryStatus: document.getElementById("batt_inst") ? document.getElementById("batt_inst").value : "",
       batteryPhoto: capturedPhotos["batt_inst"] || "",
+      batteryReason: getReasonVal("batt_inst"),
       
       sub1Id: getVal(selectedGPData, "SUBSCRIBER ID - 1"),
       sub1Org: getVal(selectedGPData, "ORGANISATION - TYPE 1"),
       sub1Status: document.getElementById("sub_1_status") ? document.getElementById("sub_1_status").value : "",
       sub1Photo: capturedPhotos["sub_1_status"] || "",
+      sub1Reason: getReasonVal("sub_1_status"),
       
       sub2Id: getVal(selectedGPData, "SUBSCRIBER ID - 2"),
       sub2Org: getVal(selectedGPData, "ORGANISATION - TYPE 2"),
       sub2Status: document.getElementById("sub_2_status") ? document.getElementById("sub_2_status").value : "",
       sub2Photo: capturedPhotos["sub_2_status"] || "",
+      sub2Reason: getReasonVal("sub_2_status"),
       
       sub3Id: getVal(selectedGPData, "SUBSCRIBER ID - 3"),
       sub3Org: getVal(selectedGPData, "ORGANISATION - TYPE 3"),
       sub3Status: document.getElementById("sub_3_status") ? document.getElementById("sub_3_status").value : "",
       sub3Photo: capturedPhotos["sub_3_status"] || "",
+      sub3Reason: getReasonVal("sub_3_status"),
       
       sub4Id: getVal(selectedGPData, "SUBSCRIBER ID - 4"),
       sub4Org: getVal(selectedGPData, "ORGANISATION - TYPE 4"),
       sub4Status: document.getElementById("sub_4_status") ? document.getElementById("sub_4_status").value : "",
       sub4Photo: capturedPhotos["sub_4_status"] || "",
+      sub4Reason: getReasonVal("sub_4_status"),
       
       sub5Id: getVal(selectedGPData, "SUBSCRIBER ID - 5"),
       sub5Org: getVal(selectedGPData, "ORGANISATION - TYPE 5"),
       sub5Status: document.getElementById("sub_5_status") ? document.getElementById("sub_5_status").value : "",
-      sub5Photo: capturedPhotos["sub_5_status"] || ""
+      sub5Photo: capturedPhotos["sub_5_status"] || "",
+      sub5Reason: getReasonVal("sub_5_status")
     };
 
     fetch(API_URL, {
