@@ -81,6 +81,7 @@
     }
 
     input[readonly] { background-color: #f8fafc; color: #64748b; cursor: not-allowed; border-style: dashed; }
+    .counter-text { font-size: 11px; color: var(--text-muted); text-align: right; margin-top: 4px; font-weight: 600; }
 
     .gps-box {
       background: #f8fafc;
@@ -112,8 +113,8 @@
     .section-surveyor h3 { color: #1e1b4b; }
     .hidden { display: none !important; }
 
-    /* CAMERA CAPTURE BOX STYLES */
-    .photo-box {
+    /* Live Camera Box Styling */
+    .cam-capture-box {
       margin-top: 10px;
       padding: 12px;
       background: #ffffff;
@@ -121,43 +122,53 @@
       border-radius: 10px;
       text-align: center;
     }
-    .photo-box-title {
-      font-size: 12px;
-      font-weight: 700;
-      color: #be123c;
-      margin-bottom: 8px;
-      display: block;
-    }
+
     .btn-cam {
-      background: #0f172a;
-      color: #fff;
+      background-color: #0f172a;
+      color: #ffffff;
       border: none;
-      padding: 9px 14px;
+      padding: 10px 14px;
       border-radius: 8px;
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
-    }
-    .btn-cam:hover { background: #334155; }
-    .photo-preview {
-      margin-top: 10px;
-      max-width: 100%;
-      max-height: 200px;
-      border-radius: 8px;
-      border: 1px solid #cbd5e1;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
+      width: 100%;
     }
 
-    /* LIVE CAMERA MODAL (NO GALLERY UPLOAD) */
-    .cam-modal {
+    .btn-cam:hover { background-color: #1e293b; }
+    .btn-retake { background-color: #d97706; margin-top: 8px; }
+    .btn-retake:hover { background-color: #b45309; }
+
+    .photo-preview {
+      width: 100%;
+      max-height: 220px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-top: 8px;
+      border: 1px solid #cbd5e1;
+      display: block;
+    }
+
+    .photo-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #059669;
+      background: #dcfce7;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-top: 6px;
+    }
+
+    /* Fullscreen Live Camera Modal */
+    .camera-modal {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.92);
+      background: rgba(15, 23, 42, 0.95);
       z-index: 9999;
       display: flex;
       flex-direction: column;
@@ -165,38 +176,56 @@
       justify-content: center;
       padding: 16px;
     }
-    .cam-modal-content {
-      background: #1e293b;
-      padding: 16px;
-      border-radius: 16px;
-      width: 100%;
-      max-width: 460px;
-      text-align: center;
+
+    .camera-modal-header {
       color: #fff;
-    }
-    .cam-modal video {
-      width: 100%;
-      border-radius: 12px;
-      background: #000;
-      max-height: 60vh;
-      object-fit: cover;
-    }
-    .cam-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 14px;
-    }
-    .cam-actions button {
-      flex: 1;
-      padding: 12px;
-      border: none;
-      border-radius: 10px;
+      font-size: 15px;
       font-weight: 700;
-      font-size: 14px;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    #liveVideo {
+      width: 100%;
+      max-width: 480px;
+      max-height: 65vh;
+      border-radius: 14px;
+      background: #000;
+      object-fit: cover;
+      border: 2px solid #475569;
+    }
+
+    .camera-controls {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      max-width: 480px;
+      margin-top: 16px;
+    }
+
+    .btn-snap {
+      flex: 2;
+      background: #059669;
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
       cursor: pointer;
     }
-    .btn-snap { background: #10b981; color: #fff; }
-    .btn-close-cam { background: #e11d48; color: #fff; }
+
+    .btn-close-cam {
+      flex: 1;
+      background: #e11d48;
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
 
     .btn {
       width: 100%;
@@ -211,6 +240,10 @@
       margin-top: 10px;
       box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
       transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
 
     .btn:hover { background-color: var(--primary-dark); }
@@ -218,8 +251,51 @@
     .btn-submit:hover { background-color: #047857; }
     .btn:disabled { background-color: #94a3b8; cursor: not-allowed; box-shadow: none; }
 
-    .loading-text { text-align: center; color: var(--text-muted); font-weight: 600; padding: 30px 0; font-size: 15px; }
-    .alert-msg { color: var(--error); text-align: center; font-weight: 600; margin: 20px 0; padding: 14px; background: #fff1f2; border: 1px solid #fecdd3; border-radius: 10px; font-size: 13.5px; }
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .alert-msg { 
+      color: var(--error); 
+      text-align: center; 
+      font-weight: 700; 
+      margin: 15px 0; 
+      padding: 16px; 
+      background: #fff1f2; 
+      border: 2px solid #fecdd3; 
+      border-radius: 12px; 
+      font-size: 16px; 
+    }
+
+    .success-banner {
+      color: #065f46;
+      text-align: center;
+      font-weight: 700;
+      margin: 15px 0;
+      padding: 16px;
+      background: #dcfce7;
+      border: 2px solid #86efac;
+      border-radius: 12px;
+      font-size: 16px;
+    }
+
+    .info-banner {
+      color: #1e40af;
+      text-align: center;
+      font-weight: 700;
+      margin: 15px 0;
+      padding: 16px;
+      background: #eff6ff;
+      border: 2px solid #bfdbfe;
+      border-radius: 12px;
+      font-size: 16px;
+    }
 
     .thank-you-card { text-align: center; padding: 50px 20px; animation: fadeIn 0.4s ease-in-out; }
     .thank-you-card .icon-circle {
@@ -240,146 +316,160 @@
   </div>
 
   <div class="card-body">
-    <div id="loader" class="loading-text">⚡ Loading Data Instantly...</div>
+    
+    <!-- STEP 1: CSC ID VERIFICATION LOGIN -->
+    <div id="cscLoginSection">
+      <div class="form-group">
+        <label for="cscIdInput">Enter CSC ID * (12 Digits)</label>
+        <input type="text" id="cscIdInput" placeholder="e.g. 538426020012" maxlength="12" oninput="onCscInput(this)" onkeypress="handleCscKeypress(event)" required>
+        <div id="cscCounter" class="counter-text">0 / 12 digits</div>
+      </div>
+      <button type="button" id="verifyBtn" class="btn" onclick="verifyCscId()">View Mapped Panchayat & Start Survey</button>
+      <div id="loginError" class="hidden"></div>
+    </div>
 
-    <!-- SINGLE STEP MAIN FORM -->
+    <!-- MAIN SURVEY FORM -->
     <form id="mainSurveyForm" class="hidden" onsubmit="submitSurvey(event)">
       
-      <!-- 1. LOCATION SELECTION -->
-      <div class="form-group">
-        <label for="districtSelect">1. Select District *</label>
-        <select id="districtSelect" onchange="onDistrictChange()" required>
-          <option value="">-- Choose District --</option>
-        </select>
+      <!-- SURVEYOR PROFILE SECTION -->
+      <div class="section section-surveyor">
+        <h3>👤 Surveyor Profile</h3>
+        
+        <div class="form-group">
+          <label for="displayCscId">CSC ID (Verified)</label>
+          <input type="text" id="displayCscId" readonly>
+        </div>
+
+        <div class="form-group">
+          <label for="vleName">VLE Name * (Editable)</label>
+          <input type="text" id="vleName" placeholder="ENTER FULL NAME" oninput="validateNameInput(this)" required>
+        </div>
+
+        <div class="form-group">
+          <label for="mobileNumber">Mobile Number * (Editable)</label>
+          <input type="tel" id="mobileNumber" placeholder="Enter 10-digit Mobile Number" maxlength="10" oninput="validateMobileInput(this)" required>
+        </div>
+
+        <div class="form-group">
+          <label for="emailId">Email ID *</label>
+          <input type="email" id="emailId" placeholder="example@domain.com" required>
+        </div>
+
+        <div class="gps-box">
+          <div class="gps-status" id="gpsStatus">📍 Capturing GPS Location...</div>
+          <div class="gps-coords">
+            <input type="text" id="latitude" placeholder="Latitude" readonly required>
+            <input type="text" id="longitude" placeholder="Longitude" readonly required>
+          </div>
+        </div>
       </div>
 
-      <div class="form-group hidden" id="blockDiv">
-        <label for="blockSelect">2. Select Block *</label>
-        <select id="blockSelect" onchange="onBlockChange()" required>
-          <option value="">-- Choose Block --</option>
-        </select>
-      </div>
+      <!-- LOCATION SELECTION -->
+      <div class="section" style="background:#f8fafc; border-left-color:#2563eb;">
+        <h3>📍 Select Mapped Location</h3>
 
-      <div class="form-group hidden" id="gpDiv">
-        <label for="gpSelect">3. Select Gram Panchayat *</label>
-        <select id="gpSelect" onchange="onGPChange()" required>
-          <option value="">-- Choose Gram Panchayat --</option>
-        </select>
+        <div class="form-group">
+          <label for="districtSelect">1. District *</label>
+          <select id="districtSelect" onchange="onDistrictChange()" required>
+            <option value="">-- Choose District --</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="blockSelect">2. Block *</label>
+          <select id="blockSelect" onchange="onBlockChange()" required>
+            <option value="">-- Choose Block --</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="gpSelect">3. Gram Panchayat *</label>
+          <select id="gpSelect" onchange="onGPChange()" required>
+            <option value="">-- Choose Gram Panchayat --</option>
+          </select>
+        </div>
       </div>
 
       <!-- DYNAMIC QUESTION CONTENT CONTAINER -->
       <div id="dynamicContent" class="hidden">
         
-        <!-- 2. SURVEYOR PROFILE SECTION -->
-        <div class="section section-surveyor">
-          <h3>👤 Surveyor Profile & Verification</h3>
-
-          <div class="form-group">
-            <label for="cscId">CSC ID * (12 digits, e.g. 538426020012)</label>
-            <input type="text" id="cscId" placeholder="e.g. 538426020012" maxlength="12" oninput="validateCscInput(this)" required>
-          </div>
-
-          <div class="form-group">
-            <label for="vleName">VLE Name * (Text Only)</label>
-            <input type="text" id="vleName" placeholder="ENTER FULL NAME" oninput="validateNameInput(this)" required>
-          </div>
-
-          <div class="form-group">
-            <label for="mobileNumber">Mobile Number * (10 Digits)</label>
-            <input type="tel" id="mobileNumber" placeholder="Enter 10-digit Mobile Number" maxlength="10" oninput="validateMobileInput(this)" required>
-          </div>
-
-          <div class="form-group">
-            <label for="emailId">Email ID *</label>
-            <input type="email" id="emailId" placeholder="example@domain.com" required>
-          </div>
-
-          <div class="gps-box">
-            <div class="gps-status" id="gpsStatus">📍 Capturing GPS Location...</div>
-            <div class="gps-coords">
-              <input type="text" id="latitude" placeholder="Latitude" readonly required>
-              <input type="text" id="longitude" placeholder="Longitude" readonly required>
-            </div>
-          </div>
-        </div>
-
-        <!-- 3. SEPARATE GPON SURVEY SECTION -->
+        <!-- GPON SURVEY SECTION -->
         <div id="gponSection" class="section section-gpon hidden">
           <h3>🖥️ GPON Survey</h3>
           <div class="form-group">
             <label>1) GPON Installed?</label>
-            <select id="gpon_inst" onchange="togglePhotoBox('gpon_inst', 'GPON Equipment')" required>
+            <select id="gpon_inst" onchange="handlePhotoToggle('gpon_inst', 'GPON Equipment')">
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
               <option value="NO">NO</option>
             </select>
-            <div id="photo_box_gpon_inst" class="photo-box hidden"></div>
+            <div id="cam_box_gpon_inst" class="cam-capture-box hidden"></div>
           </div>
         </div>
 
-        <!-- 4. ACCESS POINT SURVEY QUESTIONS SECTION -->
+        <!-- ACCESS POINT SURVEY SECTION -->
         <div id="apSection" class="section hidden">
           <h3>📡 Access Point Survey</h3>
           
           <div class="form-group">
             <label>1) Access Point - Pole Installed?</label>
-            <select id="ap_pole" onchange="togglePhotoBox('ap_pole', 'Access Point Pole')" required>
+            <select id="ap_pole" onchange="handlePhotoToggle('ap_pole', 'Access Point Pole')">
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
               <option value="NO">NO</option>
             </select>
-            <div id="photo_box_ap_pole" class="photo-box hidden"></div>
+            <div id="cam_box_ap_pole" class="cam-capture-box hidden"></div>
           </div>
 
           <div class="form-group">
             <label>2) Access Point Installed?</label>
-            <select id="ap_inst" onchange="togglePhotoBox('ap_inst', 'Access Point Device')" required>
+            <select id="ap_inst" onchange="handlePhotoToggle('ap_inst', 'Access Point Device')">
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
               <option value="NO">NO</option>
             </select>
-            <div id="photo_box_ap_inst" class="photo-box hidden"></div>
+            <div id="cam_box_ap_inst" class="cam-capture-box hidden"></div>
           </div>
 
           <div class="form-group">
             <label>3) Solar Installed?</label>
-            <select id="solar_inst" onchange="togglePhotoBox('solar_inst', 'Solar Panel')" required>
+            <select id="solar_inst" onchange="handlePhotoToggle('solar_inst', 'Solar Panel')">
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
               <option value="NO">NO</option>
             </select>
-            <div id="photo_box_solar_inst" class="photo-box hidden"></div>
+            <div id="cam_box_solar_inst" class="cam-capture-box hidden"></div>
           </div>
 
           <div class="form-group">
             <label>4) CCU Installed?</label>
-            <select id="ccu_inst" onchange="togglePhotoBox('ccu_inst', 'CCU Unit')" required>
+            <select id="ccu_inst" onchange="handlePhotoToggle('ccu_inst', 'CCU Unit')">
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
               <option value="NO">NO</option>
             </select>
-            <div id="photo_box_ccu_inst" class="photo-box hidden"></div>
+            <div id="cam_box_ccu_inst" class="cam-capture-box hidden"></div>
           </div>
 
           <div class="form-group">
             <label>5) Battery Installed?</label>
-            <select id="batt_inst" onchange="togglePhotoBox('batt_inst', 'Battery Unit')" required>
+            <select id="batt_inst" onchange="handlePhotoToggle('batt_inst', 'Battery Bank')">
               <option value="">-- Select --</option>
               <option value="YES">YES</option>
               <option value="NO">NO</option>
             </select>
-            <div id="photo_box_batt_inst" class="photo-box hidden"></div>
+            <div id="cam_box_batt_inst" class="cam-capture-box hidden"></div>
           </div>
         </div>
 
-        <!-- 5. FTTH ROUTER SURVEY QUESTIONS SECTION -->
+        <!-- FTTH ROUTER SURVEY SECTION -->
         <div id="ftthSection" class="section section-ftth hidden">
           <h3>🌐 FTTH Router Survey</h3>
           <div id="ftthSubscribersList"></div>
         </div>
 
         <div id="noSurveyMsg" class="alert-msg hidden">
-          ⚠️ Both AP and FTTH are "NOT INSTALLED" for this Gram Panchayat. Survey is not required.
+          ⚠️ इस ग्राम पंचायत के लिए AP और FTTH दोनों "उपलब्ध नहीं (Not Installed)" हैं। अतः सर्वे की आवश्यकता नहीं है।
         </div>
 
         <button type="submit" id="submitBtn" class="btn btn-submit hidden">Submit Final Survey Response</button>
@@ -395,74 +485,52 @@
   </div>
 </div>
 
-<!-- LIVE CAMERA MODAL (STRICTLY CAMERA ONLY - NO FILE PICKER) -->
-<div id="cameraModal" class="cam-modal hidden">
-  <div class="cam-modal-content">
-    <div id="camModalTitle" style="font-weight:700; margin-bottom:10px; font-size:15px;">📷 Live Photo Capture</div>
-    <video id="cameraVideo" autoplay playsinline></video>
-    <canvas id="cameraCanvas" class="hidden"></canvas>
-    <div class="cam-actions">
-      <button type="button" class="btn-snap" onclick="takeSnapshot()">📸 Capture Photo</button>
-      <button type="button" class="btn-close-cam" onclick="closeCamera()">✖ Cancel</button>
-    </div>
+<!-- LIVE CAMERA MODAL (NO FILE UPLOAD ALLOWED) -->
+<div id="cameraModal" class="camera-modal hidden">
+  <div class="camera-modal-header" id="cameraModalTitle">📷 Live Photo Capture</div>
+  <video id="liveVideo" autoplay playsinline></video>
+  <canvas id="captureCanvas" class="hidden"></canvas>
+  <div class="camera-controls">
+    <button type="button" class="btn-snap" onclick="snapPhoto()">📸 Capture Photo</button>
+    <button type="button" class="btn-close-cam" onclick="closeCamera()">Cancel</button>
   </div>
 </div>
 
 <script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbw55CJD1BAA5CswdWqZL-ktCWP9mHcLsN2pu5Ppq6ii0jIKLXaGTkmY7n7UtGT7OLWiGg/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbw0JETvro-L-dN_eUDyuUQavxOA7lr4WtIhqjZbzpXbVH3kN73Gc8-0MX37gVz89F2Hag/exec";
 
   let masterData = [];
+  let vleMappings = [];
   let selectedGPData = null;
+  let verifiedCscId = "";
 
-  // Stores captured Base64 photos keyed by fieldId (e.g., gpon_inst, ap_pole, sub_1_status)
-  let capturedPhotos = {};
-  let activePhotoField = null;
-  let activeCameraStream = null;
+  // Live Camera & Captured Photos Store
+  let capturedPhotos = {}; // { fieldId: "data:image/jpeg;base64,..." }
+  let activePhotoField = "";
+  let activePhotoLabel = "";
+  let activeStream = null;
 
   window.onload = function() {
     captureGPS();
-    
-    const localMaster = localStorage.getItem("survey_master_v2");
-    if (localMaster) {
-      masterData = JSON.parse(localMaster);
-      initApp();
-      fetchMaster(true);
-    } else {
-      fetchMaster(false);
-    }
-  };
-
-  function fetchMaster(isBg) {
     fetch(API_URL + "?action=getMasters")
       .then(res => res.json())
-      .then(data => {
-        masterData = data;
-        localStorage.setItem("survey_master_v2", JSON.stringify(data));
-        if (!isBg) initApp();
-      })
-      .catch(err => {
-        if (!isBg && masterData.length === 0) {
-          document.getElementById("loader").innerText = "❌ Connection slow. Please tap refresh.";
-        }
-      });
+      .then(data => { masterData = data; })
+      .catch(err => {});
+  };
+
+  function onCscInput(input) {
+    input.value = input.value.replace(/[^0-9]/g, '');
+    let len = input.value.length;
+    document.getElementById("cscCounter").innerText = len + " / 12 digits";
   }
 
-  function initApp() {
-    document.getElementById("loader").classList.add("hidden");
-    document.getElementById("mainSurveyForm").classList.remove("hidden");
-    populateDistricts();
-  }
-
-  function getVal(row, keyPrefix) {
-    if (!row) return "";
-    const cleanPrefix = keyPrefix.toLowerCase().trim();
-    for (let k in row) {
-      if (k.toLowerCase().trim() === cleanPrefix) return row[k];
+  function handleCscKeypress(event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      verifyCscId();
     }
-    return "";
   }
 
-  function validateCscInput(input) { input.value = input.value.replace(/[^0-9]/g, ''); }
   function validateNameInput(input) { input.value = input.value.replace(/[^a-zA-Z\s]/g, '').toUpperCase(); }
   function validateMobileInput(input) { input.value = input.value.replace(/[^0-9]/g, ''); }
 
@@ -486,128 +554,186 @@
   }
 
   /* =========================================================
-     LIVE CAMERA CAPTURE LOGIC (NO GALLERY / FILE UPLOAD)
+     STRICT LIVE CAMERA FUNCTIONS (NO FILE UPLOAD)
      ========================================================= */
-  function togglePhotoBox(fieldId, labelTitle) {
+  function handlePhotoToggle(fieldId, itemLabel) {
     const selectEl = document.getElementById(fieldId);
-    const boxEl = document.getElementById("photo_box_" + fieldId);
-    if (!selectEl || !boxEl) return;
+    const camBox = document.getElementById("cam_box_" + fieldId);
+    if (!selectEl || !camBox) return;
 
     if (selectEl.value === "YES") {
-      boxEl.classList.remove("hidden");
-      renderPhotoBoxUI(fieldId, labelTitle);
+      camBox.classList.remove("hidden");
+      renderCameraBox(fieldId, itemLabel);
     } else {
-      boxEl.classList.add("hidden");
-      boxEl.innerHTML = "";
+      camBox.classList.add("hidden");
+      camBox.innerHTML = "";
       delete capturedPhotos[fieldId];
     }
   }
 
-  function renderPhotoBoxUI(fieldId, labelTitle) {
-    const boxEl = document.getElementById("photo_box_" + fieldId);
-    const existingPhoto = capturedPhotos[fieldId];
+  function renderCameraBox(fieldId, itemLabel) {
+    const camBox = document.getElementById("cam_box_" + fieldId);
+    const safeLabel = itemLabel.replace(/'/g, "\\'");
 
-    if (existingPhoto) {
-      boxEl.innerHTML = `
-        <span class="photo-box-title" style="color:var(--success);">✅ ${labelTitle} Photo Captured</span>
-        <img src="${existingPhoto}" class="photo-preview" alt="${labelTitle}">
-        <button type="button" class="btn-cam" style="margin-top:8px; background:#475569;" onclick="openLiveCamera('${fieldId}', '${labelTitle.replace(/'/g, "\\'")}')">
+    if (capturedPhotos[fieldId]) {
+      camBox.innerHTML = `
+        <span class="photo-badge">✅ Live Photo Captured (${itemLabel})</span>
+        <img src="${capturedPhotos[fieldId]}" class="photo-preview" alt="${itemLabel}">
+        <button type="button" class="btn-cam btn-retake" onclick="openCamera('${fieldId}', '${safeLabel}')">
           🔄 Retake Live Photo
         </button>
       `;
     } else {
-      boxEl.innerHTML = `
-        <span class="photo-box-title">* Live Camera Photo Required (${labelTitle})</span>
-        <button type="button" class="btn-cam" onclick="openLiveCamera('${fieldId}', '${labelTitle.replace(/'/g, "\\'")}')">
-          📷 Open Camera
+      camBox.innerHTML = `
+        <button type="button" class="btn-cam" onclick="openCamera('${fieldId}', '${safeLabel}')">
+          📷 Open Camera & Capture Photo (${itemLabel}) *
         </button>
       `;
     }
   }
 
-  async function openLiveCamera(fieldId, labelTitle) {
+  async function openCamera(fieldId, itemLabel) {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert("❌ Camera API not supported on this browser. Please use Chrome/Safari over HTTPS.");
+      alert("❌ आपका ब्राउज़र लाइव कैमरा सपोर्ट नहीं करता। कृपया Chrome या Safari का उपयोग करें।");
       return;
     }
 
-    activePhotoField = { fieldId, labelTitle };
-    document.getElementById("camModalTitle").innerText = "📷 Capture: " + labelTitle;
-    const modal = document.getElementById("cameraModal");
-    const video = document.getElementById("cameraVideo");
+    activePhotoField = fieldId;
+    activePhotoLabel = itemLabel;
+    document.getElementById("cameraModalTitle").innerText = "📷 Capture Live Photo: " + itemLabel;
 
     try {
-      // Request rear camera directly; never opens gallery/file manager
-      activeCameraStream = await navigator.mediaDevices.getUserMedia({
+      // Rear camera priority without any file picker fallback
+      activeStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
         audio: false
       });
-      video.srcObject = activeCameraStream;
-      modal.classList.remove("hidden");
+
+      const video = document.getElementById("liveVideo");
+      video.srcObject = activeStream;
+      document.getElementById("cameraModal").classList.remove("hidden");
     } catch (err) {
-      alert("⚠️ Camera permission denied or camera unavailable. Please allow camera access in browser settings.");
+      alert("⚠️ कैमरा चालू नहीं हो सका। कृपया ब्राउज़र सेटिंग्स में Camera Permission की अनुमति दें।");
     }
   }
 
-  function takeSnapshot() {
-    if (!activePhotoField) return;
-    const video = document.getElementById("cameraVideo");
-    const canvas = document.getElementById("cameraCanvas");
+  function snapPhoto() {
+    const video = document.getElementById("liveVideo");
+    const canvas = document.getElementById("captureCanvas");
+    if (!video.videoWidth) return;
 
-    const maxDim = 800;
-    let width = video.videoWidth || 640;
-    let height = video.videoHeight || 480;
+    // Resize for fast upload while preserving clarity
+    const maxWidth = 800;
+    const scale = Math.min(1, maxWidth / video.videoWidth);
+    canvas.width = video.videoWidth * scale;
+    canvas.height = video.videoHeight * scale;
 
-    if (width > height && width > maxDim) {
-      height = Math.round((height * maxDim) / width);
-      width = maxDim;
-    } else if (height > maxDim) {
-      width = Math.round((width * maxDim) / height);
-      height = maxDim;
-    }
-
-    canvas.width = width;
-    canvas.height = height;
     const ctx = canvas.getContext("2d");
-    ctx.drawImage(video, 0, 0, width, height);
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Compress JPEG to ~0.7 quality for fast Google Apps Script upload
-    const base64Image = canvas.toDataURL("image/jpeg", 0.7);
-    capturedPhotos[activePhotoField.fieldId] = base64Image;
+    // Add GPS + Timestamp + Item Watermark
+    const lat = document.getElementById("latitude").value || "N/A";
+    const lng = document.getElementById("longitude").value || "N/A";
+    const gpName = document.getElementById("gpSelect").value || "";
+    const nowStr = new Date().toLocaleString("en-IN", { hour12: true });
 
-    const { fieldId, labelTitle } = activePhotoField;
+    ctx.fillStyle = "rgba(15, 23, 42, 0.72)";
+    ctx.fillRect(0, canvas.height - 54, canvas.width, 54);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 13px sans-serif";
+    ctx.fillText(`${activePhotoLabel} | GP: ${gpName} | CSC: ${verifiedCscId}`, 10, canvas.height - 33);
+    ctx.font = "12px sans-serif";
+    ctx.fillText(`GPS: ${lat}, ${lng} | ${nowStr}`, 10, canvas.height - 13);
+
+    // Compress to JPEG Base64
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.72);
+    capturedPhotos[activePhotoField] = dataUrl;
+
+    renderCameraBox(activePhotoField, activePhotoLabel);
     closeCamera();
-    renderPhotoBoxUI(fieldId, labelTitle);
   }
 
   function closeCamera() {
-    const modal = document.getElementById("cameraModal");
-    const video = document.getElementById("cameraVideo");
-    if (activeCameraStream) {
-      activeCameraStream.getTracks().forEach(track => track.stop());
-      activeCameraStream = null;
+    if (activeStream) {
+      activeStream.getTracks().forEach(track => track.stop());
+      activeStream = null;
     }
+    const video = document.getElementById("liveVideo");
     video.srcObject = null;
-    modal.classList.add("hidden");
-    activePhotoField = null;
-  }
-
-  function resetAllPhotos() {
-    capturedPhotos = {};
-    const boxes = document.querySelectorAll(".photo-box");
-    boxes.forEach(b => {
-      b.classList.add("hidden");
-      b.innerHTML = "";
-    });
+    document.getElementById("cameraModal").classList.add("hidden");
   }
 
   /* =========================================================
-     CASCADING DROPDOWNS
+     CSC VERIFICATION & LOCATION CASCADING
      ========================================================= */
+  async function verifyCscId() {
+    const cscVal = document.getElementById("cscIdInput").value;
+    const errDiv = document.getElementById("loginError");
+    errDiv.className = "hidden";
+    errDiv.innerHTML = "";
+
+    if (cscVal.length !== 12) {
+      errDiv.className = "alert-msg";
+      errDiv.innerHTML = "⚠️ CSC ID ठीक 12 अंकों की होनी चाहिए।";
+      return;
+    }
+    if (cscVal.charAt(8) !== '0' || cscVal.charAt(9) !== '0' || cscVal.charAt(10) !== '1') {
+      errDiv.className = "alert-msg";
+      errDiv.innerHTML = "⚠️ अमान्य CSC ID पैटर्न (9वां व 10वां अंक '0' और 11वां अंक '1' होना चाहिए)।";
+      return;
+    }
+
+    const btn = document.getElementById("verifyBtn");
+    btn.innerText = "जांच की जा रही है...";
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(API_URL + "?action=getVleDetails&cscId=" + encodeURIComponent(cscVal));
+      const data = await res.json();
+
+      if (!data.success) {
+        errDiv.className = "alert-msg";
+        errDiv.innerHTML = data.message || "⚠️ आपने प्रशिक्षण नहीं लिया है या यह CSC ID अधिकृत नहीं है। कृपया जिला प्रबंधक से संपर्क करें।";
+        btn.innerText = "View Mapped Panchayat & Start Survey";
+        btn.disabled = false;
+        return;
+      }
+
+      if (data.allSubmitted) {
+        errDiv.className = "success-banner";
+        errDiv.innerHTML = "✅ आपकी ID में मैप पंचायत का सर्वे पूरा कर लिया गया है।";
+        btn.innerText = "View Mapped Panchayat & Start Survey";
+        btn.disabled = false;
+        return;
+      }
+
+      verifiedCscId = cscVal;
+      document.getElementById("displayCscId").value = cscVal;
+      document.getElementById("vleName").value = data.vleName;
+      document.getElementById("mobileNumber").value = data.vleMobile;
+      vleMappings = data.mappings;
+
+      errDiv.className = "info-banner";
+      errDiv.innerHTML = "ℹ️ आपकी ID में कुल " + data.totalCount + " पंचायत मैप हैं जिसमें से " + data.pendingCount + " पंचायत का सर्वे अभी pending है।";
+
+      document.getElementById("cscLoginSection").classList.add("hidden");
+      document.getElementById("mainSurveyForm").classList.remove("hidden");
+
+      populateDistricts();
+
+    } catch (err) {
+      errDiv.className = "alert-msg";
+      errDiv.innerHTML = "❌ कनेक्शन में त्रुटि। कृपया पुनः प्रयास करें।";
+      btn.innerText = "View Mapped Panchayat & Start Survey";
+      btn.disabled = false;
+    }
+  }
+
   function populateDistricts() {
-    const districts = [...new Set(masterData.map(i => String(getVal(i, "DISTRICT")).trim()))].filter(Boolean);
+    const districts = [...new Set(vleMappings.map(i => i.district))].filter(Boolean);
     const select = document.getElementById("districtSelect");
-    select.innerHTML = '<option value="">-- Choose District --</option>';
+    select.innerHTML = '<option value="">-- जिला चुनें --</option>';
     districts.forEach(d => {
       let opt = document.createElement("option");
       opt.value = d; opt.textContent = d;
@@ -618,44 +744,35 @@
   function onDistrictChange() {
     const dist = document.getElementById("districtSelect").value;
     const blockSelect = document.getElementById("blockSelect");
-    blockSelect.innerHTML = '<option value="">-- Choose Block --</option>';
-    
+    blockSelect.innerHTML = '<option value="">-- ब्लॉक चुनें --</option>';
+    document.getElementById("gpSelect").innerHTML = '<option value="">-- ग्राम पंचायत चुनें --</option>';
+    document.getElementById("dynamicContent").classList.add("hidden");
+
     if (dist) {
-      const blocks = [...new Set(masterData.filter(i => String(getVal(i, "DISTRICT")).trim() === dist).map(i => String(getVal(i, "BLOCK")).trim()))].filter(Boolean);
+      const blocks = [...new Set(vleMappings.filter(i => i.district === dist).map(i => i.block))].filter(Boolean);
       blocks.forEach(b => {
         let opt = document.createElement("option");
         opt.value = b; opt.textContent = b;
         blockSelect.appendChild(opt);
       });
-      document.getElementById("blockDiv").classList.remove("hidden");
-    } else {
-      document.getElementById("blockDiv").classList.add("hidden");
     }
-    document.getElementById("gpDiv").classList.add("hidden");
-    document.getElementById("dynamicContent").classList.add("hidden");
-    resetAllPhotos();
   }
 
   function onBlockChange() {
     const dist = document.getElementById("districtSelect").value;
     const block = document.getElementById("blockSelect").value;
     const gpSelect = document.getElementById("gpSelect");
-    gpSelect.innerHTML = '<option value="">-- Choose Gram Panchayat --</option>';
+    gpSelect.innerHTML = '<option value="">-- ग्राम पंचायत चुनें --</option>';
+    document.getElementById("dynamicContent").classList.add("hidden");
 
     if (block) {
-      const gps = masterData.filter(i => String(getVal(i, "DISTRICT")).trim() === dist && String(getVal(i, "BLOCK")).trim() === block);
+      const gps = vleMappings.filter(i => i.district === dist && i.block === block);
       gps.forEach(g => {
         let opt = document.createElement("option");
-        let name = String(getVal(g, "GRAMPANCHAYAT NAME")).trim();
-        opt.value = name; opt.textContent = name;
+        opt.value = g.gpName; opt.textContent = g.gpName;
         gpSelect.appendChild(opt);
       });
-      document.getElementById("gpDiv").classList.remove("hidden");
-    } else {
-      document.getElementById("gpDiv").classList.add("hidden");
     }
-    document.getElementById("dynamicContent").classList.add("hidden");
-    resetAllPhotos();
   }
 
   function onGPChange() {
@@ -663,40 +780,69 @@
     const block = document.getElementById("blockSelect").value;
     const gpName = document.getElementById("gpSelect").value;
 
+    // Reset captured photos when GP changes
+    capturedPhotos = {};
+    document.querySelectorAll(".cam-capture-box").forEach(el => {
+      el.classList.add("hidden");
+      el.innerHTML = "";
+    });
+
+    if (!gpName) {
+      document.getElementById("dynamicContent").classList.add("hidden");
+      return;
+    }
+
     selectedGPData = masterData.find(i => 
-      String(getVal(i, "DISTRICT")).trim() === dist && 
-      String(getVal(i, "BLOCK")).trim() === block && 
-      String(getVal(i, "GRAMPANCHAYAT NAME")).trim() === gpName
+      String(getVal(i, "DISTRICT")).trim().toLowerCase() === dist.toLowerCase() && 
+      String(getVal(i, "BLOCK")).trim().toLowerCase() === block.toLowerCase() && 
+      String(getVal(i, "GRAMPANCHAYAT NAME")).trim().toLowerCase() === gpName.toLowerCase()
     );
 
-    if (!selectedGPData) return;
+    if (!selectedGPData) {
+      alert("⚠️ इस ग्राम पंचायत का मास्टर डेटा नहीं मिला है!");
+      return;
+    }
 
-    resetAllPhotos();
     document.getElementById("dynamicContent").classList.remove("hidden");
     let showSubmit = false;
 
-    // Access Point Logic Check
+    // 1. GPON Survey section
+    const gponSec = document.getElementById("gponSection");
+    const gponSelect = document.getElementById("gpon_inst");
+    gponSelect.value = "";
+    gponSec.classList.remove("hidden");
+    gponSelect.setAttribute("required", "true");
+    showSubmit = true;
+
+    // 2. Access Point survey section
+    const apSec = document.getElementById("apSection");
     const apStatus = String(getVal(selectedGPData, "ACCESS POINT STATUS")).trim().toUpperCase();
+    const apInputs = ["ap_pole", "ap_inst", "solar_inst", "ccu_inst", "batt_inst"];
+
     if (apStatus === "INSTALLED") {
-      document.getElementById("gponSection").classList.remove("hidden");
-      document.getElementById("apSection").classList.remove("hidden");
-      ["gpon_inst", "ap_pole", "ap_inst", "solar_inst", "ccu_inst", "batt_inst"].forEach(id => {
+      apSec.classList.remove("hidden");
+      apInputs.forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.value = "";
+        el.value = "";
+        el.setAttribute("required", "true");
       });
-      showSubmit = true;
     } else {
-      document.getElementById("gponSection").classList.add("hidden");
-      document.getElementById("apSection").classList.add("hidden");
+      apSec.classList.add("hidden");
+      apInputs.forEach(id => {
+        const el = document.getElementById(id);
+        el.value = "";
+        el.removeAttribute("required");
+      });
     }
 
-    // FTTH Router Logic Check
+    // 3. FTTH Router Survey logic
     const ftthContainer = document.getElementById("ftthSubscribersList");
     ftthContainer.innerHTML = "";
+    const ftthSec = document.getElementById("ftthSection");
     const ftthStatus = String(getVal(selectedGPData, "FTTH STATUS")).trim().toUpperCase();
 
     if (ftthStatus === "INSTALLED") {
-      document.getElementById("ftthSection").classList.remove("hidden");
+      ftthSec.classList.remove("hidden");
       showSubmit = true;
 
       for (let i = 1; i <= 5; i++) {
@@ -708,19 +854,19 @@
           div.className = "form-group";
           let displayLabel = org && String(org).trim() !== "" ? String(org).trim() : `Location ${i}`;
           let safeLabel = displayLabel.replace(/'/g, "\\'");
-
+          
           div.innerHTML = `<label>${displayLabel} - Router Installed?</label>
-            <select id="sub_${i}_status" onchange="togglePhotoBox('sub_${i}_status', 'FTTH Router - ${safeLabel}')" required>
-              <option value="">-- Select --</option>
+            <select id="sub_${i}_status" onchange="handlePhotoToggle('sub_${i}_status', 'FTTH Router - ${safeLabel}')" required>
+              <option value="">-- चुनें --</option>
               <option value="YES">YES</option>
               <option value="NO">NO</option>
             </select>
-            <div id="photo_box_sub_${i}_status" class="photo-box hidden"></div>`;
+            <div id="cam_box_sub_${i}_status" class="cam-capture-box hidden"></div>`;
           ftthContainer.appendChild(div);
         }
       }
     } else {
-      document.getElementById("ftthSection").classList.add("hidden");
+      ftthSec.classList.add("hidden");
     }
 
     if (!showSubmit) {
@@ -732,92 +878,67 @@
     }
   }
 
+  function getVal(row, keyPrefix) {
+    if (!row) return "";
+    const cleanPrefix = keyPrefix.toLowerCase().trim();
+    for (let k in row) {
+      if (k.toLowerCase().trim() === cleanPrefix) return row[k];
+    }
+    return "";
+  }
+
   async function submitSurvey(e) {
     e.preventDefault();
 
-    // 1. CSC ID Pattern Check
-    const cscVal = document.getElementById("cscId").value;
-    const isCscValid = (cscVal.length === 12) && 
-                       (cscVal.charAt(8) === '0') && 
-                       (cscVal.charAt(9) === '0') && 
-                       (cscVal.charAt(10) === '1');
-
-    if (!isCscValid) { 
-      alert("PLEASE ENTER CORRECT CSC ID"); 
-      return; 
-    }
-
-    // 2. Mobile Validation
     const mobVal = document.getElementById("mobileNumber").value;
     if (mobVal.length !== 10 || !/^[6-9]/.test(mobVal)) { 
-      alert("PLEASE ENTER CORRECT MOBILE NUMBER"); 
+      alert("कृपया सही 10 अंकों का मोबाइल नंबर दर्ज करें"); 
       return; 
     }
 
-    // 3. GPS Coordinates Check
     if (!document.getElementById("latitude").value) {
-      alert("❌ Please allow GPS/Location permission to proceed!");
+      alert("❌ कृपया आगे बढ़ने के लिए GPS/लोकेशन की अनुमति दें!");
       captureGPS(); 
       return;
     }
 
-    // 4. Mandatory Live Photo Check for Every "YES" Selection
+    // Validate that every field selected as "YES" has a captured live photo
     const requiredPhotoChecks = [
-      { id: "gpon_inst", name: "GPON Installed" },
-      { id: "ap_pole", name: "Access Point - Pole" },
-      { id: "ap_inst", name: "Access Point Installed" },
-      { id: "solar_inst", name: "Solar Installed" },
-      { id: "ccu_inst", name: "CCU Installed" },
-      { id: "batt_inst", name: "Battery Installed" },
-      { id: "sub_1_status", name: "FTTH Subscriber 1 Router" },
-      { id: "sub_2_status", name: "FTTH Subscriber 2 Router" },
-      { id: "sub_3_status", name: "FTTH Subscriber 3 Router" },
-      { id: "sub_4_status", name: "FTTH Subscriber 4 Router" },
-      { id: "sub_5_status", name: "FTTH Subscriber 5 Router" }
+      { id: "gpon_inst", label: "GPON Equipment" },
+      { id: "ap_pole", label: "Access Point Pole" },
+      { id: "ap_inst", label: "Access Point Device" },
+      { id: "solar_inst", label: "Solar Panel" },
+      { id: "ccu_inst", label: "CCU Unit" },
+      { id: "batt_inst", label: "Battery Bank" },
+      { id: "sub_1_status", label: "FTTH Location 1 Router" },
+      { id: "sub_2_status", label: "FTTH Location 2 Router" },
+      { id: "sub_3_status", label: "FTTH Location 3 Router" },
+      { id: "sub_4_status", label: "FTTH Location 4 Router" },
+      { id: "sub_5_status", label: "FTTH Location 5 Router" }
     ];
 
     for (let item of requiredPhotoChecks) {
       const el = document.getElementById(item.id);
-      if (el && !el.closest(".hidden") && el.value === "YES" && !capturedPhotos[item.id]) {
-        alert(`📷 कृपया "${item.name}" की लाइव फोटो कैप्चर करें!`);
+      if (el && el.value === "YES" && !capturedPhotos[item.id]) {
+        alert(`⚠️ आपने "${item.label}" के लिए YES चुना है। कृपया पहले लाइव कैमरे से इसकी फ़ोटो कैप्चर करें!`);
         el.scrollIntoView({ behavior: "smooth", block: "center" });
         return;
       }
     }
 
     const btn = document.getElementById("submitBtn");
-    btn.innerText = "Verifying CSC ID...";
+    btn.innerHTML = '<div class="spinner"></div> फ़ोटो व डेटा सबमिट किया जा रहा है...';
     btn.disabled = true;
 
-    // 5. Real-time Trained VLE Check
-    try {
-      const checkRes = await fetch(API_URL + "?action=validateCsc&cscId=" + encodeURIComponent(cscVal));
-      const checkData = await checkRes.json();
-
-      if (!checkData.allowed) {
-        alert("आपने प्रशिक्षण नहीं लिया है कृपया अपने सीएससी जिला प्रबंधक से संपर्क करें");
-        btn.innerText = "Submit Final Survey Response";
-        btn.disabled = false;
-        return;
-      }
-    } catch (err) {
-      alert("❌ Error verifying CSC ID. Please try again.");
-      btn.innerText = "Submit Final Survey Response";
-      btn.disabled = false;
-      return;
-    }
-
-    btn.innerText = "Submitting Response & Photos...";
-
-    const selectedDistrict = getVal(selectedGPData, "DISTRICT");
-    const selectedBlock = getVal(selectedGPData, "BLOCK");
-    const selectedGp = getVal(selectedGPData, "GRAMPANCHAYAT NAME");
+    const selectedDistrict = document.getElementById("districtSelect").value;
+    const selectedBlock = document.getElementById("blockSelect").value;
+    const selectedGp = document.getElementById("gpSelect").value;
 
     const payload = {
       surveyorDistrict: selectedDistrict,
       surveyorBlock: selectedBlock,
       surveyorGp: selectedGp,
-      cscId: cscVal,
+      cscId: verifiedCscId,
       vleName: document.getElementById("vleName").value,
       mobileNumber: mobVal,
       emailId: document.getElementById("emailId").value,
@@ -886,8 +1007,8 @@
       document.getElementById("thankYouScreen").classList.remove("hidden");
     })
     .catch(err => {
-      alert("❌ Submission Error: " + err);
-      btn.innerText = "Submit Final Survey Response";
+      alert("❌ सबमिशन त्रुटि: " + err);
+      btn.innerHTML = "Submit Final Survey Response";
       btn.disabled = false;
     });
   }
