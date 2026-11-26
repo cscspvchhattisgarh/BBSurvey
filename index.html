@@ -337,7 +337,7 @@
     <div id="cscLoginSection">
       <div class="form-group">
         <label for="cscIdInput">Enter CSC ID * (12 Digits)</label>
-        <input type="text" id="cscIdInput" placeholder="e.g. 538426020012" maxlength="12" oninput="onCscInput(this)" onkeypress="handleCscKeypress(event)" required>
+        <input type="text" id="cscIdInput" placeholder="e.g. 217435370016" maxlength="12" oninput="onCscInput(this)" onkeypress="handleCscKeypress(event)" required>
         <div id="cscCounter" class="counter-text">0 / 12 digits</div>
       </div>
       <button type="button" id="verifyBtn" class="btn" onclick="verifyCscId()">View Mapped Panchayat & Start Survey</button>
@@ -775,12 +775,15 @@
 
       verifiedCscId = cscVal;
       document.getElementById("displayCscId").value = cscVal;
-      document.getElementById("vleName").value = data.vleName;
-      document.getElementById("mobileNumber").value = data.vleMobile;
-      vleMappings = data.mappings;
+      document.getElementById("vleName").value = data.vleName || "";
+      document.getElementById("mobileNumber").value = data.vleMobile || "";
+      vleMappings = data.mappings || [];
 
-      errDiv.className = "info-banner";
-      errDiv.innerHTML = "ℹ️ आपकी ID में कुल " + data.totalCount + " पंचायत मैप हैं जिसमें से " + data.pendingCount + " पंचायत का सर्वे अभी pending है।";
+      // यदि पेज लोड पर masterData किसी कारण से खाली रह गया हो तो दोबारा लोड करें
+      if (!masterData || masterData.length === 0) {
+        const mRes = await fetch(API_URL + "?action=getMasters");
+        masterData = await mRes.json();
+      }
 
       document.getElementById("cscLoginSection").classList.add("hidden");
       document.getElementById("mainSurveyForm").classList.remove("hidden");
@@ -796,7 +799,7 @@
   }
 
   function populateDistricts() {
-    const districts = [...new Set(vleMappings.map(i => i.district))].filter(Boolean);
+    const districts = [...new Set(vleMappings.map(i => i.district))].filter(Boolean).sort();
     const select = document.getElementById("districtSelect");
     select.innerHTML = '<option value="">-- जिला चुनें --</option>';
     districts.forEach(d => {
@@ -804,6 +807,11 @@
       opt.value = d; opt.textContent = d;
       select.appendChild(opt);
     });
+    // यदि केवल 1 ही जिला मैप है तो अपने-आप सेलेक्ट करें
+    if (districts.length === 1) {
+      select.value = districts[0];
+      onDistrictChange();
+    }
   }
 
   function onDistrictChange() {
@@ -814,12 +822,16 @@
     document.getElementById("dynamicContent").classList.add("hidden");
 
     if (dist) {
-      const blocks = [...new Set(vleMappings.filter(i => i.district === dist).map(i => i.block))].filter(Boolean);
+      const blocks = [...new Set(vleMappings.filter(i => i.district === dist).map(i => i.block))].filter(Boolean).sort();
       blocks.forEach(b => {
         let opt = document.createElement("option");
         opt.value = b; opt.textContent = b;
         blockSelect.appendChild(opt);
       });
+      if (blocks.length === 1) {
+        blockSelect.value = blocks[0];
+        onBlockChange();
+      }
     }
   }
 
@@ -863,7 +875,7 @@
     );
 
     if (!selectedGPData) {
-      alert("⚠️ इस ग्राम पंचायत का मास्टर डेटा नहीं मिला है!");
+      alert("⚠️ इस ग्राम पंचायत का मास्टर डेटा (MasterData) नहीं मिला है!");
       return;
     }
 
@@ -1084,6 +1096,12 @@
     })
     .then(res => res.json())
     .then(res => {
+      if (res.success === false) {
+        alert("❌ सर्वर त्रुटि: " + (res.error || "Unknown error"));
+        btn.innerHTML = "Submit Final Survey Response";
+        btn.disabled = false;
+        return;
+      }
       document.getElementById("mainSurveyForm").classList.add("hidden");
       document.getElementById("appHeader").classList.add("hidden");
       document.getElementById("thankYouScreen").classList.remove("hidden");
